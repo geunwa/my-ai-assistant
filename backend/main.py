@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_allowed_origins
-from app.routers import health
+from app.routers import data, health
 
 app = FastAPI(
     title="나만의 AI 비서 API",
@@ -21,3 +21,4 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
+app.include_router(data.router)
