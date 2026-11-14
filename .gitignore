@@ -1,0 +1,18 @@
+# 가상환경
+.venv/
+venv/
+
+# 환경 변수와 비밀 키 (절대 올리지 않는다)
+.env
+.env.*
+!.env.example
+*serviceAccount*.json
+*firebase-adminsdk*.json
+
+# 파이썬 캐시
+__pycache__/
+*.pyc
+
+# 기타
+.DS_Store
+.vscode/
