@@ -14,3 +14,12 @@ def get_allowed_origins() -> list[str]:
     """쉼표로 구분된 ALLOWED_ORIGINS를 주소 목록으로 바꾼다."""
     raw = os.getenv("ALLOWED_ORIGINS", DEFAULT_ALLOWED_ORIGINS)
     return [origin.strip().rstrip("/") for origin in raw.split(",") if origin.strip()]
+
+def get_firebase_json() -> str | None:
+    """배포 환경용: 서비스 계정 키 파일의 JSON 내용 전체를 담은 환경 변수."""
+    return os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+
+
+def get_firebase_path() -> str | None:
+    """내 PC용: 서비스 계정 키 파일의 경로를 담은 환경 변수."""
+    return os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH")
