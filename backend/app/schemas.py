@@ -1,6 +1,6 @@
 """요청과 응답의 형태(스키마)를 정의한다. FastAPI가 이 정의로 입력을 검사하고 Swagger 문서를 만든다."""
 from datetime import date as date_type
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -67,3 +67,27 @@ class SummaryResponse(BaseModel):
     count: int
     metrics: Optional[Metrics]
     trend: str
+
+class Message(BaseModel):
+    """대화 속 메시지 한 개."""
+    role: Literal["user", "assistant"] = Field(description="누가 말했는지")
+    content: str = Field(min_length=1, max_length=4000, description="메시지 내용")
+
+
+class ConversationCreate(BaseModel):
+    """대화 저장 요청."""
+    title: str = Field(default="새 대화", min_length=1, max_length=100)
+    messages: list[Message] = Field(default_factory=list, max_length=200)
+
+
+class ConversationSummary(BaseModel):
+    """대화 목록 항목. 메시지 본문은 포함하지 않는다."""
+    id: str
+    title: str
+    created_at: str
+    updated_at: str
+
+
+class Conversation(ConversationSummary):
+    """대화 상세. 메시지 전체를 포함한다."""
+    messages: list[Message]
