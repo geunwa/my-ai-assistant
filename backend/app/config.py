@@ -27,3 +27,26 @@ def get_firebase_json() -> str | None:
 def get_firebase_path() -> str | None:
     """내 PC용: 서비스 계정 키 파일의 경로를 담은 환경 변수."""
     return os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH")
+
+# OpenAI 기본값: 작고 싼 모델과 짧은 답변 한도
+DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
+DEFAULT_OPENAI_MAX_TOKENS = 400
+
+
+def get_openai_api_key() -> str | None:
+    """OpenAI API 키. 없으면 None (채팅만 막고 서버는 계속 동작한다)."""
+    return os.getenv("OPENAI_API_KEY") or None
+
+
+def get_openai_model() -> str:
+    """사용할 모델 이름. OPENAI_MODEL로 바꿀 수 있다."""
+    return os.getenv("OPENAI_MODEL") or DEFAULT_OPENAI_MODEL
+
+
+def get_openai_max_tokens() -> int:
+    """답변 최대 토큰 수. OPENAI_MAX_TOKENS로 바꿀 수 있고, 잘못된 값이면 기본값을 쓴다."""
+    try:
+        value = int(os.getenv("OPENAI_MAX_TOKENS", ""))
+    except ValueError:
+        return DEFAULT_OPENAI_MAX_TOKENS
+    return value if value > 0 else DEFAULT_OPENAI_MAX_TOKENS

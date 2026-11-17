@@ -56,3 +56,10 @@ def delete_conversation(conv_id: str) -> bool:
         return False
     ref.delete()
     return True
+
+
+def append_messages(conv_id: str, new_messages: list[dict]) -> None:
+    """기존 대화 끝에 메시지를 붙이고 updated_at을 갱신한다."""
+    ref = _col().document(conv_id)
+    doc = ref.get().to_dict()
+    ref.update({"messages": doc["messages"] + new_messages, "updated_at": _now()})

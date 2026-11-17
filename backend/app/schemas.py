@@ -91,3 +91,15 @@ class ConversationSummary(BaseModel):
 class Conversation(ConversationSummary):
     """대화 상세. 메시지 전체를 포함한다."""
     messages: list[Message]
+
+
+class ChatRequest(BaseModel):
+    """채팅 요청. conversation_id가 없으면 새 대화를 만든다."""
+    message: str = Field(min_length=1, max_length=1000, description="사용자 질문")
+    conversation_id: Optional[str] = Field(default=None, description="이어갈 대화 ID (선택)")
+
+
+class ChatResponse(BaseModel):
+    """채팅 응답."""
+    conversation_id: str
+    answer: str
