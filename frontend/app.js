@@ -1,5 +1,6 @@
-// 해외여행 검색 관심도 AI 비서 - 프론트엔드 (순수 JavaScript)
+// 떠날까 - 해외여행 검색 관심도 AI 비서 (순수 JavaScript)
 // 서버에서 받은 글은 모두 textContent로만 화면에 넣는다 (HTML로 해석하지 않음).
+// 아이콘은 index.html에 들어 있는 SVG 모음(#i-plane)을 <use>로 가져다 쓴다.
 
 (function () {
   "use strict";
@@ -9,6 +10,7 @@
   const REQUEST_TIMEOUT_MS = 60000;
   const CHAT_TIMEOUT_MS = 120000;  // AI 답변은 더 오래 걸릴 수 있다
   const PAGE_SIZE = 10;
+  const SVG_NS = "http://www.w3.org/2000/svg";
 
   const $ = (id) => document.getElementById(id);
 
@@ -18,6 +20,19 @@
     if (className) node.className = className;
     if (text !== undefined) node.textContent = text;
     return node;
+  }
+
+  function svgEl(tag, attrs) {
+    const node = document.createElementNS(SVG_NS, tag);
+    Object.keys(attrs || {}).forEach((k) => node.setAttribute(k, attrs[k]));
+    return node;
+  }
+
+  // 비행기 아이콘 (index.html의 #i-plane을 가져다 쓴다)
+  function planeIcon(className) {
+    const svg = svgEl("svg", { "class": className || "", "aria-hidden": "true" });
+    svg.appendChild(svgEl("use", { href: "#i-plane" }));
+    return svg;
   }
 
   function clear(node) {
@@ -51,8 +66,8 @@
         signal: controller.signal,
       });
     } catch (e) {
-      if (e.name === "AbortError") throw new Error("서버 응답이 너무 오래 걸립니다. 잠시 후 다시 시도해 주세요.");
-      throw new Error("서버에 연결하지 못했습니다. 네트워크와 서버 상태를 확인해 주세요.");
+      if (e.name === "AbortError") throw new Error("서버 응답이 너무 오래 걸려요. 잠시 후 다시 시도해 주세요.");
+      throw new Error("서버에 연결하지 못했어요. 네트워크와 서버 상태를 확인해 주세요.");
     } finally {
       clearTimeout(timer);
     }
@@ -61,7 +76,7 @@
     try { data = await res.json(); } catch (e) { /* 본문이 없거나 JSON이 아님 */ }
 
     if (!res.ok) {
-      const message = data && data.detail !== undefined ? detailToText(data.detail) : "요청에 실패했습니다 (HTTP " + res.status + ")";
+      const message = data && data.detail !== undefined ? detailToText(data.detail) : "요청에 실패했어요 (HTTP " + res.status + ")";
       throw new Error(message);
     }
     return data;
@@ -98,7 +113,7 @@
       $("wake-banner").hidden = false;
       const update = () => {
         const sec = Math.floor((Date.now() - wakeStart) / 1000);
-        $("wake-text").textContent = "서버를 깨우는 중입니다. 무료 서버는 처음 접속할 때 최대 1분 정도 걸릴 수 있어요. (" + sec + "초)";
+        $("wake-text").textContent = "서버를 깨우는 중이에요. 무료 서버라 처음에는 최대 1분 정도 걸릴 수 있어요. (" + sec + "초)";
       };
       update();
       wakeTimer = setInterval(update, 1000);
@@ -115,7 +130,7 @@
       clearTimeout(showTimer);
       clearInterval(wakeTimer);
       $("wake-banner").hidden = false;
-      $("wake-text").textContent = "서버에 연결하지 못했습니다: " + e.message;
+      $("wake-text").textContent = "서버에 연결하지 못했어요: " + e.message;
       $("wake-retry").hidden = false;
       setStatus("bad", "연결 실패");
     }
@@ -135,11 +150,37 @@
   // ---------- 데이터 요약 + 그래프 ----------
   let allData = [];   // 날짜 오름차순
 
-  function stat(label, value, sub, extraClass) {
+  // 숫자 뒤에 붙는 조사(이/가): 마지막 숫자를 읽었을 때 받침이 있으면 "이"
+  function josaIGa(numText) {
+    const last = numText.replace(/[^0-9]/g, "").slice(-1);   // 영·일·삼·육·칠·팔은 받침이 있다
+    return last && "013678".indexOf(last) >= 0 ? "이" : "가";
+  }
+
+  // 서버의 추세 문장에서 숫자를 그대로 꺼내 읽기 쉬운 문장으로 바꾼다.
+  // 형식이 다르면(예: 판단 불가) 서버 문구를 그대로 보여 준다.
+  function trendSentence(trend) {
+    const m = /^(\S+) \(최근 8주 평균 ([\d.]+), 직전 8주 평균 ([\d.]+), 변화율 ([+-]?[\d.]+)%\)/.exec(trend || "");
+    if (!m) return trend;
+    const label = m[1], recent = m[2], previous = m[3], rate = m[4];
+    const head = "최근 8주 평균 " + recent + josaIGa(recent) + " 직전 8주 " + previous;
+    const magnitude = rate.replace(/^[+-]/, "");
+    if (label === "상승") return head + "보다 " + magnitude + "% 높아요 → 상승";
+    if (label === "하락") return head + "보다 " + magnitude + "% 낮아요 → 하락";
+    return head + "와 비슷해요 (변화율 " + rate + "%) → " + label;
+  }
+
+  // 카드 하나를 만든다. value는 { main, of }(숫자 카드) 또는 { text }(문장 카드)
+  function stat(label, value, subs, extraClass) {
     const box = el("div", "stat" + (extraClass ? " " + extraClass : ""));
     box.appendChild(el("div", "label", label));
-    box.appendChild(el("div", extraClass === "wide" ? "text" : "value", value));
-    if (sub) box.appendChild(el("div", "sub", sub));
+    if (value.text !== undefined) {
+      box.appendChild(el("div", "text", value.text));
+    } else {
+      const v = el("div", "value", value.main);
+      if (value.of) v.appendChild(el("span", "of", " " + value.of));
+      box.appendChild(v);
+    }
+    (subs || []).forEach((s) => box.appendChild(el("div", "sub" + (s.strong ? " strong" : ""), s.text)));
     return box;
   }
 
@@ -147,66 +188,70 @@
     const root = $("summary");
     clear(root);
     if (!s || s.count === 0) {
-      root.appendChild(el("div", "empty", "저장된 데이터가 없습니다."));
+      root.appendChild(el("div", "empty", "아직 데이터가 없어요."));
       return;
     }
     const m = s.metrics;
-    root.appendChild(stat("기간", s.period, null, "wide"));
-    root.appendChild(stat("데이터 수", s.count + "주"));
-    root.appendChild(stat("평균", String(m.average)));
-    root.appendChild(stat("최대", String(m.max.value), m.max.date));
-    root.appendChild(stat("최소", String(m.min.value), m.min.date));
-    root.appendChild(stat("최근값", String(m.latest.value), m.latest.date));
-    root.appendChild(stat("최근 추세", s.trend, null, "wide"));
+    const OF = "/ 100";
+    const years = Math.round(s.count / 52);
+    const countText = s.count + "주" + (years >= 1 ? " (약 " + years + "년)" : "");
+
+    root.appendChild(stat("기간", { main: s.period }, [{ text: "날짜 = 그 주의 시작일(일요일)" }], "wide period"));
+    root.appendChild(stat("데이터 수", { main: countText }));
+    root.appendChild(stat("평균", { main: String(m.average), of: OF }));
+    root.appendChild(stat("최대", { main: String(m.max.value), of: OF }, [{ text: m.max.date }], "max"));
+    root.appendChild(stat("최소", { main: String(m.min.value), of: OF }, [{ text: m.min.date }]));
+
+    const latestSubs = [{ text: m.latest.date }];
+    if (m.average > 0) {
+      latestSubs.push({ text: "평균의 약 " + (m.latest.value / m.average).toFixed(1) + "배", strong: true });
+    }
+    root.appendChild(stat("최근값", { main: String(m.latest.value), of: OF }, latestSubs, "latest"));
+    root.appendChild(stat("최근 추세", { text: trendSentence(s.trend) }, null, "wide"));
   }
 
   function renderChart(rows) {
     const root = $("chart");
     clear(root);
     if (!rows.length) return;
-    const W = 560, H = 150, padL = 26, padR = 8, padT = 8, padB = 20;
-    const NS = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(NS, "svg");
-    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-    svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", "주간 관심도 꺾은선 그래프");
+    const W = 420, H = 180, padL = 46, padR = 22, padT = 28, padB = 24;
+    const svg = svgEl("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "주간 관심도 지수 꺾은선 그래프" });
 
     const x = (i) => padL + (rows.length === 1 ? 0 : (i / (rows.length - 1)) * (W - padL - padR));
     const y = (v) => padT + (1 - v / 100) * (H - padT - padB);
 
+    function text(attrs, content) {
+      const t = svgEl("text", Object.assign({ "font-size": "11.5", fill: "#5b6b7e" }, attrs));
+      t.textContent = content;
+      return t;
+    }
+
     [0, 50, 100].forEach((v) => {
-      const line = document.createElementNS(NS, "line");
-      line.setAttribute("x1", padL); line.setAttribute("x2", W - padR);
-      line.setAttribute("y1", y(v)); line.setAttribute("y2", y(v));
-      line.setAttribute("stroke", "#e2e7ee");
-      svg.appendChild(line);
-      const t = document.createElementNS(NS, "text");
-      t.setAttribute("x", padL - 4); t.setAttribute("y", y(v) + 4);
-      t.setAttribute("text-anchor", "end"); t.setAttribute("font-size", "10"); t.setAttribute("fill", "#6b7686");
-      t.textContent = String(v);
-      svg.appendChild(t);
+      svg.appendChild(svgEl("line", { x1: padL, x2: W - padR, y1: y(v), y2: y(v), stroke: "#e3eef9" }));
+      svg.appendChild(text({ x: padL - 5, y: y(v) + 4, "text-anchor": "end" }, String(v)));
     });
+    // 세로축 제목
+    svg.appendChild(text({ x: 11, y: (padT + H - padB) / 2, "text-anchor": "middle", transform: "rotate(-90 11 " + (padT + H - padB) / 2 + ")" }, "관심도 지수"));
 
-    const poly = document.createElementNS(NS, "polyline");
-    poly.setAttribute("points", rows.map((r, i) => x(i).toFixed(1) + "," + y(r.value).toFixed(1)).join(" "));
-    poly.setAttribute("fill", "none");
-    poly.setAttribute("stroke", "#2563eb");
-    poly.setAttribute("stroke-width", "1.6");
-    svg.appendChild(poly);
+    svg.appendChild(svgEl("polyline", {
+      points: rows.map((r, i) => x(i).toFixed(1) + "," + y(r.value).toFixed(1)).join(" "),
+      fill: "none", stroke: "#378add", "stroke-width": "1.6", "stroke-linejoin": "round",
+    }));
 
-    const last = rows[rows.length - 1];
-    const dot = document.createElementNS(NS, "circle");
-    dot.setAttribute("cx", x(rows.length - 1)); dot.setAttribute("cy", y(last.value));
-    dot.setAttribute("r", "3.5"); dot.setAttribute("fill", "#2563eb");
-    svg.appendChild(dot);
+    // 가장 높은 지점에 작은 비행기를 표시한다
+    let maxIdx = 0;
+    rows.forEach((r, i) => { if (r.value > rows[maxIdx].value) maxIdx = i; });
+    const mx = x(maxIdx), my = y(rows[maxIdx].value);
+    svg.appendChild(svgEl("circle", { cx: mx, cy: my, r: 3, fill: "#378add" }));
+    const plane = svgEl("use", { href: "#i-plane", x: mx - 12, y: my - 19, width: 24, height: 20 });
+    svg.appendChild(plane);
+    const onRight = maxIdx > rows.length / 2;
+    svg.appendChild(text({ x: onRight ? mx - 14 : mx + 14, y: my - 6, "text-anchor": onRight ? "end" : "start", fill: "#1f2d3d", "font-weight": "700" },
+      "최고 " + rows[maxIdx].value + " (" + rows[maxIdx].date + ")"));
 
-    [[0, "start"], [rows.length - 1, "end"]].forEach(([i, anchor]) => {
-      const t = document.createElementNS(NS, "text");
-      t.setAttribute("x", x(i)); t.setAttribute("y", H - 5);
-      t.setAttribute("text-anchor", anchor); t.setAttribute("font-size", "10"); t.setAttribute("fill", "#6b7686");
-      t.textContent = rows[i].date;
-      svg.appendChild(t);
-    });
+    // 가로축: 처음과 끝 날짜
+    svg.appendChild(text({ x: x(0), y: H - 5, "text-anchor": "start" }, rows[0].date));
+    svg.appendChild(text({ x: x(rows.length - 1), y: H - 5, "text-anchor": "end" }, rows[rows.length - 1].date));
     root.appendChild(svg);
   }
 
@@ -215,7 +260,7 @@
       renderSummary(await api("GET", "/api/data/summary"));
     } catch (e) {
       clear($("summary"));
-      $("summary").appendChild(el("div", "empty", "요약을 불러오지 못했습니다: " + e.message));
+      $("summary").appendChild(el("div", "empty", "요약을 불러오지 못했어요: " + e.message));
     }
   }
 
@@ -229,7 +274,7 @@
       renderChart(allData);
       renderTable();
     } catch (e) {
-      toast("데이터를 불러오지 못했습니다: " + e.message);
+      toast("데이터를 불러오지 못했어요: " + e.message);
     }
   }
 
@@ -249,7 +294,7 @@
     clear(body);
     if (!slice.length) {
       const tr = el("tr");
-      const td = el("td", "empty", "데이터가 없습니다.");
+      const td = el("td", "empty", "아직 데이터가 없어요.");
       td.colSpan = 4;
       tr.appendChild(td);
       body.appendChild(tr);
@@ -305,14 +350,14 @@
   async function saveEdit(row, date, value, memo) {
     const changes = {};
     if (date !== row.date) changes.date = date;
-    if (value === "" || isNaN(Number(value))) { toast("관심도는 숫자로 입력해 주세요."); return; }
+    if (value === "" || isNaN(Number(value))) { toast("관심도 지수는 숫자로 입력해 주세요."); return; }
     if (Number(value) !== row.value) changes.value = Number(value);
     if (memo !== (row.memo || "")) changes.memo = memo;
     if (!Object.keys(changes).length) { editingId = null; renderTable(); return; }
     try {
       await api("PUT", "/api/data/" + encodeURIComponent(row.id), changes);
       editingId = null;
-      toast("수정했습니다.", true);
+      toast("수정했어요.", true);
       await Promise.all([loadData(), loadSummary()]);
     } catch (e) {
       toast(e.message);
@@ -323,7 +368,7 @@
     if (!confirm(row.date + " 데이터를 삭제할까요?")) return;
     try {
       await api("DELETE", "/api/data/" + encodeURIComponent(row.id));
-      toast("삭제했습니다.", true);
+      toast("삭제했어요.", true);
       await Promise.all([loadData(), loadSummary()]);
     } catch (e) {
       toast(e.message);
@@ -341,7 +386,7 @@
       await api("POST", "/api/data", body);
       $("add-form").reset();
       page = 0;
-      toast("추가했습니다.", true);
+      toast("추가했어요.", true);
       await Promise.all([loadData(), loadSummary()]);
     } catch (e) {
       toast(e.message);
@@ -371,7 +416,7 @@
 
   function renderChat() {
     $("chat-title").textContent = chat.title;
-    renderMessages($("messages"), chat.messages, "궁금한 점을 물어보세요. 예: 최근 관심도 추세를 알려줘");
+    renderMessages($("messages"), chat.messages, "함께 여행 관심도를 살펴볼까요? 아래에 궁금한 점을 적어 주세요.");
   }
 
   function newChat() {
@@ -386,6 +431,17 @@
     $("chat-input").focus();
   });
 
+  // 작은 비행기가 점선 위를 좌우로 오가는 로딩 말풍선
+  function loadingBubble() {
+    const box = el("div", "bubble assistant loading");
+    const flight = el("div", "flight");
+    flight.appendChild(el("span", "track"));
+    flight.appendChild(planeIcon("flyer"));
+    box.appendChild(flight);
+    box.appendChild(el("span", null, "답변을 준비하고 있어요"));
+    return box;
+  }
+
   async function sendChat() {
     if (sending) return;
     const input = $("chat-input");
@@ -399,9 +455,7 @@
     const box = $("messages");
     if (!chat.messages.length) clear(box);   // 안내 문구 제거
     box.appendChild(bubble("user", text));
-    const loading = el("div", "bubble assistant loading");
-    loading.appendChild(document.createTextNode("답변을 작성하는 중"));
-    loading.appendChild(el("span", "dots"));
+    const loading = loadingBubble();
     box.appendChild(loading);
     box.scrollTop = box.scrollHeight;
 
@@ -442,12 +496,12 @@
       const items = await api("GET", "/api/conversations");
       clear(list);
       if (!items.length) {
-        list.appendChild(el("li", "empty", "저장된 대화가 없습니다."));
+        list.appendChild(el("li", "empty", "아직 저장된 여행 이야기가 없어요."));
         return;
       }
       items.forEach((item) => list.appendChild(historyItem(item)));
     } catch (e) {
-      toast("대화 목록을 불러오지 못했습니다: " + e.message);
+      toast("대화 목록을 불러오지 못했어요: " + e.message);
     }
   }
 
@@ -472,8 +526,7 @@
       selected = await api("GET", "/api/conversations/" + encodeURIComponent(id));
       $("preview-title").textContent = selected.title;
       $("preview-actions").hidden = false;
-      renderMessages($("preview"), selected.messages, "메시지가 없습니다.");
-      document.querySelectorAll(".history-item").forEach((n) => n.classList.remove("selected"));
+      renderMessages($("preview"), selected.messages, "메시지가 없어요.");
       await loadHistory();
     } catch (e) {
       toast(e.message);
@@ -485,7 +538,7 @@
     $("preview-title").textContent = "대화 내용";
     $("preview-actions").hidden = true;
     clear($("preview"));
-    $("preview").appendChild(el("div", "empty", "왼쪽 목록에서 대화를 선택하세요."));
+    $("preview").appendChild(el("div", "empty", "왼쪽에서 여행 이야기를 골라 보세요."));
   }
 
   async function deleteConversation(id, title) {
@@ -494,7 +547,7 @@
       await api("DELETE", "/api/conversations/" + encodeURIComponent(id));
       if (selected && selected.id === id) clearPreview();
       if (chat.id === id) newChat();
-      toast("삭제했습니다.", true);
+      toast("삭제했어요.", true);
       await loadHistory();
     } catch (e) {
       toast(e.message);
