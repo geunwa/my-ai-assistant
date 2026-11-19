@@ -77,7 +77,7 @@
 ## STEP 9
 
 - 배포(Deploy, 디플로이) - 내 PC에서만 돌던 프로그램을 인터넷의 서버에 올려 누구나 접속하게 하는 것.
-- Render(렌더) - 코드를 올리면 서버로 실행해 주는 클라우드 호스팅 서비스.
+- Render(렌더) - 코드를 올리면 서버로 실행해 주는 클라우드 호스팅 서비스. 이 프로젝트의 API 주소는 https://my-ai-assistant-pjlv.onrender.com 이다.
 - 버전 고정(Pinning, 피닝) - 패키지 버전을 ==로 못 박아 어디서 설치해도 같은 결과가 나오게 하는 것.
 - 루트 디렉터리(Root Directory, 루트 디렉터리) - Render가 빌드와 실행의 기준으로 삼는 폴더. 여기서는 backend.
 - 빌드 명령·시작 명령(Build Command, Start Command) - 설치 단계에서 실행할 명령과 서버를 켤 때 실행할 명령.
