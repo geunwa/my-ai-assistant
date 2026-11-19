@@ -400,8 +400,24 @@
   const chat = { id: null, title: "새 대화", messages: [] };
   let sending = false;
 
+  // **굵게** 만 <strong>으로 바꾼다. 글자는 모두 텍스트 노드로 넣어 다른 HTML은 해석되지 않는다.
+  function appendRichText(node, text) {
+    text.split(/(\*\*[^*\n]+\*\*)/).forEach((part) => {
+      if (/^\*\*[^*\n]+\*\*$/.test(part)) {
+        const s = document.createElement("strong");
+        s.textContent = part.slice(2, -2);
+        node.appendChild(s);
+      } else if (part) {
+        node.appendChild(document.createTextNode(part));
+      }
+    });
+  }
+
   function bubble(role, text) {
-    return el("div", "bubble " + role, text);
+    const node = el("div", "bubble " + role);
+    if (role === "assistant") appendRichText(node, text);
+    else node.textContent = text;
+    return node;
   }
 
   function renderMessages(root, messages, emptyText) {

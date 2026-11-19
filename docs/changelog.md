@@ -40,12 +40,15 @@
 | 채팅과 요약 | evidence/step10_chat-summary.png | evidence/step10-2_chat-summary.png (촬영 예정) |
 | 데이터 관리 | evidence/step10_data.png | evidence/step10-2_data.png (촬영 예정) |
 | 대화 기록 | evidence/step10_history.png | evidence/step10-2_history.png (촬영 예정) |
-| 채팅 로딩(선택) | 없음 | evidence/step10-2_chat-loading.png (촬영 예정) |
+| 채팅 로딩(선택) | 없음 | evidence/step10-2_chat-loading.png (촬영함) |
 
 ### 함께 발견한 환경 문제
 - 이 PC에서 Windows 애플리케이션 제어 정책이 OpenAI 라이브러리가 쓰는 서명되지 않은 파일(jiter.pyd)을 차단해, 로컬 서버(8000)의 채팅이 실패한다. 이전 STEP에서는 동작했으므로 PC의 보안 정책이 바뀐 것으로 보인다. 배포 서버(Render, Linux)에는 영향이 없다.
 - 오류 원인(2026-11-19 재현): backend\.venv\Lib\site-packages\jiter\jiter.cp313-win_amd64.pyd 를 불러올 때 "ImportError: DLL load failed while importing jiter: 애플리케이션 제어 정책에서 이 파일을 차단했습니다." 가 난다(서명 상태 NotSigned). 고치지 않고 원인만 기록했고, 이후 채팅 확인은 배포 서버(config.js를 Render 주소로 둠)로 한다.
 - 보안 설정은 변경하지 않았다. 새 프롬프트의 채팅은 차단된 파일을 사용하지 않는 시험 스크립트(저장소 밖)로 1회 확인했다.
+
+### 추가 수정: 굵은 글씨 표시
+- 배포 서버 채팅에서 답변의 마크다운 **굵게** 기호가 그대로 보였다. 말풍선(채팅·대화 기록 미리보기)에서 **텍스트**를 <strong>으로 표시하도록 고쳤다(innerHTML 없이 텍스트 노드와 strong 요소로만 구성). 시스템 프롬프트에는 굵게와 "- " 목록 외의 마크다운(제목, 표, 코드 블록)을 쓰지 않는 규칙을 추가했다.
 
 ### 알려진 한계
 - 서버의 입력 검증 문구는 영어로 표시된다(예: "Input should be less than or equal to 100"). detail 문구를 그대로 보여 주는 요구사항 때문이며, 한국어로 바꾸려면 백엔드 메시지를 수정해야 한다.
