@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>해외여행 관심도 AI 비서</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1>해외여행 검색 관심도 AI 비서</h1>
+      <span id="server-status" class="badge badge-wait">서버 확인 중</span>
+    </div>
+  </header>
+
+  <div id="wake-banner" class="banner" hidden>
+    <span id="wake-text"></span>
+    <button id="wake-retry" type="button" hidden>다시 시도</button>
+  </div>
+
+  <div id="toast" class="toast" role="alert" hidden>
+    <span id="toast-text"></span>
+    <button id="toast-close" type="button" aria-label="닫기">×</button>
+  </div>
+
+  <nav class="tabs" aria-label="화면 선택">
+    <button class="tab active" data-tab="chat" type="button">채팅</button>
+    <button class="tab" data-tab="data" type="button">데이터 관리</button>
+    <button class="tab" data-tab="history" type="button">대화 기록</button>
+  </nav>
+
+  <main>
+    <!-- 채팅 + 데이터 요약 -->
+    <section id="tab-chat" class="panel">
+      <div class="chat-layout">
+        <div class="card chat-card">
+          <div class="card-head">
+            <h2 id="chat-title">새 대화</h2>
+            <button id="new-chat" type="button" class="btn btn-ghost">새 대화</button>
+          </div>
+          <div id="messages" class="messages" aria-live="polite"></div>
+          <form id="chat-form" class="chat-form">
+            <textarea id="chat-input" rows="2" maxlength="1000"
+              placeholder="예: 최근 관심도 추세를 알려줘 (Enter 전송, Shift+Enter 줄바꿈)"></textarea>
+            <button id="chat-send" type="submit" class="btn btn-primary">보내기</button>
+          </form>
+        </div>
+
+        <aside class="card summary-card">
+          <div class="card-head"><h2>데이터 요약</h2></div>
+          <div id="summary" class="summary"></div>
+          <div class="chart-wrap">
+            <div class="chart-title">주간 관심도 (0~100)</div>
+            <div id="chart"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 데이터 관리 -->
+    <section id="tab-data" class="panel" hidden>
+      <div class="card">
+        <div class="card-head"><h2>데이터 추가</h2></div>
+        <form id="add-form" class="add-form">
+          <label>날짜<input id="add-date" type="date" required></label>
+          <label>관심도 (0~100)<input id="add-value" type="number" min="0" max="100" step="any" required></label>
+          <label class="grow">메모<input id="add-memo" type="text" maxlength="200" placeholder="선택"></label>
+          <button type="submit" class="btn btn-primary">추가</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>데이터 목록</h2>
+          <span id="data-count" class="muted"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>날짜</th><th>관심도</th><th>메모</th><th class="actions-col">관리</th></tr>
+            </thead>
+            <tbody id="data-body"></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button id="page-prev" type="button" class="btn btn-ghost">이전</button>
+          <span id="page-info" class="muted"></span>
+          <button id="page-next" type="button" class="btn btn-ghost">다음</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 대화 기록 -->
+    <section id="tab-history" class="panel" hidden>
+      <div class="history-layout">
+        <div class="card">
+          <div class="card-head">
+            <h2>대화 목록</h2>
+            <button id="history-refresh" type="button" class="btn btn-ghost">새로고침</button>
+          </div>
+          <ul id="history-list" class="history-list"></ul>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h2 id="preview-title">대화 내용</h2>
+            <div id="preview-actions" class="btn-row" hidden>
+              <button id="preview-continue" type="button" class="btn btn-primary">이어서 대화하기</button>
+              <button id="preview-delete" type="button" class="btn btn-danger">삭제</button>
+            </div>
+          </div>
+          <div id="preview" class="messages preview"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
