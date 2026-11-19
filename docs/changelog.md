@@ -37,9 +37,9 @@
 ### 수정 전후 증빙 파일
 | 화면 | 수정 전 | 수정 후 |
 |---|---|---|
-| 채팅과 요약 | evidence/step10_chat-summary.png | evidence/step10-2_chat-summary.png (촬영 예정) |
-| 데이터 관리 | evidence/step10_data.png | evidence/step10-2_data.png (촬영 예정) |
-| 대화 기록 | evidence/step10_history.png | evidence/step10-2_history.png (촬영 예정) |
+| 채팅과 요약 | evidence/step10_chat-summary.png | evidence/step10-2_chat-summary.png (촬영함) |
+| 데이터 관리 | evidence/step10_data.png | evidence/step10-2_data.png (촬영함) |
+| 대화 기록 | evidence/step10_history.png | evidence/step10-2_history.png (촬영함) |
 | 채팅 로딩(선택) | 없음 | evidence/step10-2_chat-loading.png (촬영함) |
 
 ### 함께 발견한 환경 문제
@@ -52,4 +52,4 @@
 
 ### 알려진 한계
 - 서버의 입력 검증 문구는 영어로 표시된다(예: "Input should be less than or equal to 100"). detail 문구를 그대로 보여 주는 요구사항 때문이며, 한국어로 바꾸려면 백엔드 메시지를 수정해야 한다.
-- 요약만 프롬프트에 들어가므로 "특정 주의 값" 같은 질문에는 답하지 못한다.
+- 요약만 프롬프트에 들어가므로 "특정 주의 값", 주별·월별 값 같은 질문에는 모른다고 답한다. STEP 13 보너스(Function Calling) 후보: 질문에 따라 데이터를 조회하는 함수를 모델이 호출하게 하면 해결할 수 있다.
