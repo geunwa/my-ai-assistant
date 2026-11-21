@@ -234,6 +234,32 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
 #help { position: fixed; left: 18px; bottom: 16px; font-size: 12.5px; color: var(--muted); z-index: 5; }
 #toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); background: var(--text); color: #fff; padding: 9px 18px; border-radius: 999px; font-size: 14px; opacity: 0; transition: opacity .2s; z-index: 9; pointer-events: none; }
 #toast.on { opacity: 1; }
+/* 클릭 표시 */
+a, button { cursor: pointer; }
+.hand { width: 15px; height: 15px; color: var(--orange); flex: none; animation: tap 1.6s ease-in-out infinite; }
+@keyframes tap { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px) scale(1.08); } }
+.clickhint { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 700; color: var(--orange); background: var(--yellow-l); border-radius: 999px; padding: 3px 10px; }
+/* 개수 표시 */
+.cnt { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 800; font-style: normal; margin-left: 4px; }
+.cnt.l { background: var(--yellow); color: var(--text); }
+/* 작업 흐름 */
+.flowline { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.flowline .chip { display: inline-flex; align-items: center; gap: 7px; background: var(--sky); border-radius: 999px; padding: 7px 16px; font-size: 15.5px; font-weight: 700; }
+.flowline .chip .ic { color: var(--blue); font-size: 18px; }
+.flowline > .ic { color: var(--blue-l); font-size: 22px; }
+/* 움직이는 장식 */
+.deco path { animation: dashflow 1.2s linear infinite; }
+@keyframes dashflow { to { stroke-dashoffset: -19; } }
+.badge { animation: bob 3.2s ease-in-out infinite; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+/* 설명글 */
+#notes { position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%); width: min(1100px, 94vw); max-height: 44vh; overflow-y: auto; z-index: 8;
+  background: rgba(31, 45, 61, .96); color: #f4f9fe; border-radius: 18px; padding: 18px 24px 20px; box-shadow: 0 12px 40px rgba(0,0,0,.25); display: none; }
+#notes.on { display: block; }
+#notes .nh { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #9fd0ff; font-weight: 700; margin-bottom: 8px; }
+#notes ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; font-size: 18px; line-height: 1.65; }
+#notes ol li::marker { color: var(--yellow); font-weight: 800; }
+#notes b { color: var(--yellow); }
 @media print {
   html, body { overflow: visible; background: #fff; }
   #nav, #progress, #help, #toast { display: none; }
@@ -280,6 +306,7 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
     <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></symbol>
     <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></symbol>
     <symbol id="i-loader" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V10"/><path d="M12 9.5a1.5 1.5 0 0 1 3 0V11"/><path d="M15 10.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-4.7-2.3L3.8 15.4a1.6 1.6 0 0 1 2.5-2L9 16v-5"/></symbol>
     <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
     <symbol id="plane-flat" viewBox="14 10 50 34">
       <g stroke="#378ADD" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -326,24 +353,25 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
     <p class="sub">해외여행 검색 관심도 AI 비서</p>
     <p class="desc">5년 치 "해외여행" 검색 데이터를 알고<br><b class="em">숫자로 답하는</b> AI 비서</p>
     <div class="links">
+      <span class="clickhint" style="width:fit-content"><svg class="hand"><use href="#i-hand"/></svg>주소를 누르면 열리고, 복사 버튼으로 주소를 복사할 수 있어요</span>
       <div class="link">
         <div class="li"><svg class="ic"><use href="#i-globe"/></svg></div>
         <div class="ln">서비스</div>
-        <a class="url" href="https://tteonalkka.vercel.app" target="_blank" rel="noopener">https://tteonalkka.vercel.app</a>
+        <a class="url" style="display:inline-flex; align-items:center; gap:6px" href="https://tteonalkka.vercel.app" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg><span style="overflow:hidden; text-overflow:ellipsis">https://tteonalkka.vercel.app</span></a>
         <button class="btn" data-copy="https://tteonalkka.vercel.app"><svg class="ic"><use href="#i-copy"/></svg>복사</button>
         <a class="btn primary" href="https://tteonalkka.vercel.app" target="_blank" rel="noopener"><svg class="ic"><use href="#i-ext"/></svg>열기</a>
       </div>
       <div class="link">
         <div class="li"><svg class="ic"><use href="#i-server"/></svg></div>
         <div class="ln">API 문서</div>
-        <a class="url" href="https://my-ai-assistant-pjlv.onrender.com/docs" target="_blank" rel="noopener">https://my-ai-assistant-pjlv.onrender.com/docs</a>
+        <a class="url" style="display:inline-flex; align-items:center; gap:6px" href="https://my-ai-assistant-pjlv.onrender.com/docs" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg><span style="overflow:hidden; text-overflow:ellipsis">https://my-ai-assistant-pjlv.onrender.com/docs</span></a>
         <button class="btn" data-copy="https://my-ai-assistant-pjlv.onrender.com/docs"><svg class="ic"><use href="#i-copy"/></svg>복사</button>
         <a class="btn primary" href="https://my-ai-assistant-pjlv.onrender.com/docs" target="_blank" rel="noopener"><svg class="ic"><use href="#i-ext"/></svg>열기</a>
       </div>
       <div class="link">
         <div class="li"><svg class="ic"><use href="#i-github"/></svg></div>
         <div class="ln">GitHub</div>
-        <a class="url" href="https://github.com/geunwa/my-ai-assistant" target="_blank" rel="noopener">https://github.com/geunwa/my-ai-assistant</a>
+        <a class="url" style="display:inline-flex; align-items:center; gap:6px" href="https://github.com/geunwa/my-ai-assistant" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg><span style="overflow:hidden; text-overflow:ellipsis">https://github.com/geunwa/my-ai-assistant</span></a>
         <button class="btn" data-copy="https://github.com/geunwa/my-ai-assistant"><svg class="ic"><use href="#i-copy"/></svg>복사</button>
         <a class="btn primary" href="https://github.com/geunwa/my-ai-assistant" target="_blank" rel="noopener"><svg class="ic"><use href="#i-ext"/></svg>열기</a>
       </div>
@@ -354,13 +382,13 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
 
 <!-- 2. 과제 개요 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp1" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp1"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.0s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-target"/></svg></div>
     <div><div class="no">과제 소개</div><h2>과제 한눈에 보기</h2></div></div>
   <div class="key"><svg class="ic"><use href="#i-bulb"/></svg>
     <p>일반 ChatGPT는 <b>내 데이터를 모릅니다.</b><br>
     <mark>내 데이터를 이해하고 맞춤형으로 답하는 AI 웹 서비스</mark>를 만드는 과제입니다.</p></div>
-  <p class="sm muted" style="margin-bottom:10px">완성해야 하는 결과물 4가지</p>
+  <p class="sm muted" style="margin-bottom:10px">완성해야 하는 결과물 <i class="cnt">4</i></p>
   <div class="row c4">
     <div class="card"><h3><svg class="ic"><use href="#i-chat"/></svg>AI 채팅</h3>
       <ul class="list tight"><li><span>자연어로 질문</span></li><li><span><b>저장된 데이터 요약</b>을<br>반영한 답변</span></li><li><span>기다리는 동안 로딩 표시</span></li></ul></div>
@@ -371,40 +399,40 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
     <div class="card"><h3><svg class="ic"><use href="#i-cloud"/></svg>배포와 문서화</h3>
       <ul class="list tight"><li><span>화면과 서버를 인터넷에 배포</span></li><li><span>Swagger로 API 문서 확인</span></li><li><span><b>README</b>로 실행 방법 안내</span></li></ul></div>
   </div>
-  <div class="card" style="margin-top:16px; padding:14px 22px">
-    <p class="sm muted" style="margin-bottom:8px">작업 흐름</p>
-    <div style="display:flex; align-items:center; justify-content:space-between; font-size:16px; font-weight:700">
-      <span><svg class="ic" style="color:var(--blue)"><use href="#i-chart"/></svg> 시계열 데이터 분석</span>
-      <svg class="ic" style="color:var(--blue-l); font-size:24px"><use href="#i-arrow"/></svg>
-      <span><svg class="ic" style="color:var(--blue)"><use href="#i-db"/></svg> 데이터베이스 저장</span>
-      <svg class="ic" style="color:var(--blue-l); font-size:24px"><use href="#i-arrow"/></svg>
-      <span><svg class="ic" style="color:var(--blue)"><use href="#i-spark"/></svg> 데이터 기반 AI 대화</span>
-      <svg class="ic" style="color:var(--blue-l); font-size:24px"><use href="#i-arrow"/></svg>
-      <span><svg class="ic" style="color:var(--blue)"><use href="#i-globe"/></svg> 웹 서비스 배포</span>
+  <div class="card" style="margin-top:16px; padding:14px 22px; display:flex; align-items:center; gap:20px">
+    <p class="sm muted" style="flex:none">작업 흐름</p>
+    <div class="flowline" style="flex:1">
+      <span class="chip"><svg class="ic"><use href="#i-chart"/></svg>시계열 데이터 분석</span>
+      <svg class="ic"><use href="#i-arrow"/></svg>
+      <span class="chip"><svg class="ic"><use href="#i-db"/></svg>데이터베이스 저장</span>
+      <svg class="ic"><use href="#i-arrow"/></svg>
+      <span class="chip"><svg class="ic"><use href="#i-spark"/></svg>데이터 기반 AI 대화</span>
+      <svg class="ic"><use href="#i-arrow"/></svg>
+      <span class="chip"><svg class="ic"><use href="#i-globe"/></svg>웹 서비스 배포</span>
     </div>
   </div>
 </section>
 
 <!-- 3. 요구사항과 제출 항목 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp2" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp2"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-list"/></svg></div>
     <div><div class="no">과제 소개</div><h2>요구사항과 제출 항목</h2></div></div>
   <div class="row fill" style="grid-template-columns: 1.25fr 1fr">
     <div class="card">
-      <h3><svg class="ic"><use href="#i-layers"/></svg>필수 요구사항</h3>
-      <dl class="info" style="grid-template-columns: 64px 1fr; gap:11px 12px; font-size:15px">
-        <dt>기술</dt><dd>백엔드 <b>FastAPI</b> · 화면 <b>HTML/CSS/JS</b> (프레임워크 금지)<br>DB <b>Firebase Firestore</b> · AI <b>OpenAI GPT API</b></dd>
-        <dt>배포</dt><dd>백엔드는 <b>Render</b>, 프론트엔드는 <b>Vercel</b></dd>
-        <dt>데이터</dt><dd>관심 있는 시계열 데이터 <mark>100개 이상</mark><br>요약: 기간 · 개수 · 평균/최대/최소 · 최근 추세</dd>
-        <dt>API</dt><dd>데이터 5개 (CRUD 4 + 요약 1) · 대화 4개 · 채팅 1개<br>채팅은 <b>요약을 시스템 프롬프트에 넣고</b> 대화를 자동 저장</dd>
-        <dt>화면</dt><dd>채팅 + 로딩 · 데이터 관리 · 대화 기록 · 데이터 요약</dd>
-        <dt>보안</dt><dd>API 키는 <b>환경 변수</b>로만 관리 (코드에 노출 금지)<br>입력 검증 · 예외 처리 · 토큰 제한</dd>
+      <h3><svg class="ic"><use href="#i-layers"/></svg>필수 요구사항 <span class="muted sm" style="font-family:Pretendard,sans-serif">6개 분야 · 세부</span><i class="cnt">25</i></h3>
+      <dl class="info" style="grid-template-columns: 92px 1fr; gap:11px 12px; font-size:15px">
+        <dt>기술<i class="cnt l">4</i></dt><dd>백엔드 <b>FastAPI</b> · 화면 <b>HTML/CSS/JS</b> (프레임워크 금지)<br>DB <b>Firebase Firestore</b> · AI <b>OpenAI GPT API</b></dd>
+        <dt>배포<i class="cnt l">2</i></dt><dd>백엔드는 <b>Render</b>, 프론트엔드는 <b>Vercel</b> (각 1)</dd>
+        <dt>데이터<i class="cnt l">2</i></dt><dd>관심 있는 시계열 데이터 <mark>100개 이상</mark><br>요약: 기간 · 개수 · 평균/최대/최소 · 최근 추세</dd>
+        <dt>API<i class="cnt l">10</i></dt><dd>데이터 5개 (CRUD 4 + 요약 1) · 대화 4개 · 채팅 1개<br>채팅은 <b>요약을 시스템 프롬프트에 넣고</b> 대화를 자동 저장</dd>
+        <dt>화면<i class="cnt l">4</i></dt><dd>채팅 + 로딩 · 데이터 관리 · 대화 기록 · 데이터 요약</dd>
+        <dt>보안<i class="cnt l">3</i></dt><dd>API 키는 <b>환경 변수</b>로만 관리 (코드에 노출 금지)<br>입력 검증 · 예외 처리 · 토큰 제한</dd>
       </dl>
     </div>
     <div style="display:flex; flex-direction:column; gap:14px">
       <div class="card">
-        <h3><svg class="ic"><use href="#i-github"/></svg>제출 항목</h3>
+        <h3><svg class="ic"><use href="#i-github"/></svg>제출 항목<i class="cnt">3</i></h3>
         <ul class="list" style="font-size:15px; gap:10px">
           <li><span><b>GitHub 저장소</b>를 코디세이 플랫폼에 연결</span></li>
           <li><span><b>README.md</b><br><span class="muted sm">서비스 소개 · 기술 스택 · 배포 URL 3개(화면, API, Swagger)<br>로컬 실행 방법 · 환경 변수 목록</span></span></li>
@@ -412,7 +440,7 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
         </ul>
       </div>
       <div class="card">
-        <h3><svg class="ic"><use href="#i-spark"/></svg>보너스 (선택)</h3>
+        <h3><svg class="ic"><use href="#i-spark"/></svg>보너스 (선택)<i class="cnt">2</i></h3>
         <ul class="list tight">
           <li><span><b>Function Calling</b> + MCP 또는 GPT Actions 연동</span></li>
           <li><span>지표 추가 · 그래프 · CSV/JSON 내보내기 · 다크 모드</span></li>
@@ -424,7 +452,7 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
 
 <!-- 4. 같은 질문, 다른 답 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp3" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="4.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp3"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="4.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-spark"/></svg></div>
     <div><div class="no">01 · 문제 정의</div><h2>같은 질문, 다른 답</h2></div></div>
   <div class="key"><svg class="ic"><use href="#i-bulb"/></svg>
@@ -445,7 +473,7 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
       <h3><svg class="ic"><use href="#plane"/></svg>떠날까</h3>
       <div class="chat">
         <div class="bubble user">요즘 해외여행 관심도 어때?</div>
-        <div class="bubble bot">2026-11-01 주 관심도 지수는 <b>77점(100점 만점)</b>이에요.<br>최근 8주 평균 <b>60.0점</b>이 그전 8주 <b>35.2점</b>보다<br><b>70.2%</b> 올라서 뚜렷한 상승 흐름이에요.</div>
+        <div class="bubble bot"><b>2026년 11월 1주(11.1~11.7)</b> 관심도 지수는<br><b>77점(100점 만점)</b>이에요.<br>최근 8주 평균 <b>60.0점</b>이 그전 8주 <b>35.2점</b>보다<br><b>70.2%</b> 올라서 뚜렷한 상승 흐름이에요.</div>
       </div>
       <ul class="list tight" style="margin-top:16px">
         <li><span>저장된 데이터의 <b>실제 숫자</b>로 답함</span></li>
@@ -457,16 +485,16 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
 
 <!-- 5. 데이터 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp4" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp4"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.0s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-chart"/></svg></div>
     <div><div class="no">02 · 데이터</div><h2>5년 치 "해외여행" 검색 관심도</h2></div></div>
   <div class="row fill" style="grid-template-columns: 1.3fr 1fr">
     <div class="card" style="display:flex; flex-direction:column">
       <h3><svg class="ic"><use href="#i-chart"/></svg>주간 관심도 지수 (261주)</h3>
-      <svg viewBox="0 0 560 250" class="chart" role="img" aria-label="주간 관심도 지수 그래프"><line x1="40" x2="544" y1="224.0" y2="224.0" stroke="#e3eef9"/><text x="34" y="228.0" text-anchor="end">0</text><line x1="40" x2="544" y1="125.0" y2="125.0" stroke="#e3eef9"/><text x="34" y="129.0" text-anchor="end">50</text><line x1="40" x2="544" y1="26.0" y2="26.0" stroke="#e3eef9"/><text x="34" y="30.0" text-anchor="end">100</text><text x="34" y="14" text-anchor="end">(점)</text><polyline points="40.0,174.5 41.9,180.4 43.9,184.4 45.8,196.3 47.8,190.3 49.7,192.3 51.6,202.2 53.6,194.3 55.5,186.4 57.4,194.3 59.4,198.3 61.3,188.4 63.3,190.3 65.2,186.4 67.1,184.4 69.1,188.4 71.0,180.4 73.0,176.5 74.9,170.5 76.8,168.6 78.8,170.5 80.7,160.6 82.6,160.6 84.6,152.7 86.5,156.7 88.5,158.7 90.4,166.6 92.3,158.7 94.3,158.7 96.2,160.6 98.2,156.7 100.1,160.6 102.0,158.7 104.0,156.7 105.9,158.7 107.8,154.7 109.8,160.6 111.7,162.6 113.7,154.7 115.6,158.7 117.5,160.6 119.5,160.6 121.4,166.6 123.4,166.6 125.3,156.7 127.2,154.7 129.2,150.7 131.1,156.7 133.0,166.6 135.0,160.6 136.9,158.7 138.9,158.7 140.8,146.8 142.7,144.8 144.7,148.8 146.6,148.8 148.6,136.9 150.5,140.8 152.4,125.0 154.4,134.9 156.3,119.1 158.2,115.1 160.2,125.0 162.1,117.1 164.1,115.1 166.0,129.0 167.9,136.9 169.9,146.8 171.8,146.8 173.8,152.7 175.7,154.7 177.6,146.8 179.6,144.8 181.5,146.8 183.4,150.7 185.4,140.8 187.3,148.8 189.3,142.8 191.2,132.9 193.1,142.8 195.1,158.7 197.0,150.7 199.0,160.6 200.9,150.7 202.8,140.8 204.8,142.8 206.7,148.8 208.6,140.8 210.6,142.8 212.5,154.7 214.5,148.8 216.4,150.7 218.3,156.7 220.3,144.8 222.2,144.8 224.2,152.7 226.1,158.7 228.0,152.7 230.0,156.7 231.9,148.8 233.8,162.6 235.8,156.7 237.7,168.6 239.7,158.7 241.6,158.7 243.5,156.7 245.5,152.7 247.4,142.8 249.4,146.8 251.3,140.8 253.2,144.8 255.2,148.8 257.1,142.8 259.0,132.9 261.0,136.9 262.9,144.8 264.9,148.8 266.8,146.8 268.7,152.7 270.7,148.8 272.6,154.7 274.6,146.8 276.5,152.7 278.4,150.7 280.4,164.6 282.3,160.6 284.2,160.6 286.2,158.7 288.1,160.6 290.1,146.8 292.0,154.7 293.9,146.8 295.9,150.7 297.8,140.8 299.8,146.8 301.7,138.9 303.6,140.8 305.6,138.9 307.5,127.0 309.4,138.9 311.4,134.9 313.3,138.9 315.3,146.8 317.2,138.9 319.1,136.9 321.1,144.8 323.0,148.8 325.0,152.7 326.9,138.9 328.8,154.7 330.8,140.8 332.7,146.8 334.6,152.7 336.6,150.7 338.5,152.7 340.5,152.7 342.4,150.7 344.3,144.8 346.3,136.9 348.2,129.0 350.2,105.2 352.1,127.0 354.0,127.0 356.0,115.1 357.9,117.1 359.8,111.1 361.8,119.1 363.7,115.1 365.7,117.1 367.6,130.9 369.5,130.9 371.5,130.9 373.4,144.8 375.4,142.8 377.3,140.8 379.2,134.9 381.2,154.7 383.1,152.7 385.0,160.6 387.0,148.8 388.9,146.8 390.9,140.8 392.8,146.8 394.7,148.8 396.7,154.7 398.6,146.8 400.6,146.8 402.5,142.8 404.4,134.9 406.4,132.9 408.3,121.0 410.2,115.1 412.2,129.0 414.1,123.0 416.1,119.1 418.0,119.1 419.9,121.0 421.9,117.1 423.8,134.9 425.8,132.9 427.7,129.0 429.6,134.9 431.6,136.9 433.5,115.1 435.4,129.0 437.4,127.0 439.3,140.8 441.3,136.9 443.2,127.0 445.1,127.0 447.1,117.1 449.0,127.0 451.0,115.1 452.9,123.0 454.8,109.2 456.8,119.1 458.7,115.1 460.6,107.2 462.6,105.2 464.5,105.2 466.5,115.1 468.4,111.1 470.3,136.9 472.3,144.8 474.2,130.9 476.2,142.8 478.1,138.9 480.0,144.8 482.0,138.9 483.9,146.8 485.8,152.7 487.8,158.7 489.7,152.7 491.7,160.6 493.6,142.8 495.5,138.9 497.5,152.7 499.4,138.9 501.4,142.8 503.3,142.8 505.2,146.8 507.2,146.8 509.1,138.9 511.0,138.9 513.0,144.8 514.9,150.7 516.9,158.7 518.8,156.7 520.7,156.7 522.7,146.8 524.6,154.7 526.6,156.7 528.5,152.7 530.4,158.7 532.4,144.8 534.3,142.8 536.2,156.7 538.2,79.5 540.1,26.0 542.1,61.6 544.0,71.5" fill="none" stroke="#378add" stroke-width="1.8" stroke-linejoin="round"/><circle cx="540.1" cy="26.0" r="4" fill="#378add"/><text x="532.1" y="18.0" text-anchor="end" class="strong">최고 100점 (2026-10-18)</text><text x="40" y="244">2021-11-07</text><text x="544" y="244" text-anchor="end">2026-11-01</text></svg>
+      <svg viewBox="0 0 560 250" class="chart" role="img" aria-label="주간 관심도 지수 그래프"><line x1="40" x2="544" y1="224.0" y2="224.0" stroke="#e3eef9"/><text x="34" y="228.0" text-anchor="end">0</text><line x1="40" x2="544" y1="125.0" y2="125.0" stroke="#e3eef9"/><text x="34" y="129.0" text-anchor="end">50</text><line x1="40" x2="544" y1="26.0" y2="26.0" stroke="#e3eef9"/><text x="34" y="30.0" text-anchor="end">100</text><text x="34" y="14" text-anchor="end">(점)</text><polyline points="40.0,174.5 41.9,180.4 43.9,184.4 45.8,196.3 47.8,190.3 49.7,192.3 51.6,202.2 53.6,194.3 55.5,186.4 57.4,194.3 59.4,198.3 61.3,188.4 63.3,190.3 65.2,186.4 67.1,184.4 69.1,188.4 71.0,180.4 73.0,176.5 74.9,170.5 76.8,168.6 78.8,170.5 80.7,160.6 82.6,160.6 84.6,152.7 86.5,156.7 88.5,158.7 90.4,166.6 92.3,158.7 94.3,158.7 96.2,160.6 98.2,156.7 100.1,160.6 102.0,158.7 104.0,156.7 105.9,158.7 107.8,154.7 109.8,160.6 111.7,162.6 113.7,154.7 115.6,158.7 117.5,160.6 119.5,160.6 121.4,166.6 123.4,166.6 125.3,156.7 127.2,154.7 129.2,150.7 131.1,156.7 133.0,166.6 135.0,160.6 136.9,158.7 138.9,158.7 140.8,146.8 142.7,144.8 144.7,148.8 146.6,148.8 148.6,136.9 150.5,140.8 152.4,125.0 154.4,134.9 156.3,119.1 158.2,115.1 160.2,125.0 162.1,117.1 164.1,115.1 166.0,129.0 167.9,136.9 169.9,146.8 171.8,146.8 173.8,152.7 175.7,154.7 177.6,146.8 179.6,144.8 181.5,146.8 183.4,150.7 185.4,140.8 187.3,148.8 189.3,142.8 191.2,132.9 193.1,142.8 195.1,158.7 197.0,150.7 199.0,160.6 200.9,150.7 202.8,140.8 204.8,142.8 206.7,148.8 208.6,140.8 210.6,142.8 212.5,154.7 214.5,148.8 216.4,150.7 218.3,156.7 220.3,144.8 222.2,144.8 224.2,152.7 226.1,158.7 228.0,152.7 230.0,156.7 231.9,148.8 233.8,162.6 235.8,156.7 237.7,168.6 239.7,158.7 241.6,158.7 243.5,156.7 245.5,152.7 247.4,142.8 249.4,146.8 251.3,140.8 253.2,144.8 255.2,148.8 257.1,142.8 259.0,132.9 261.0,136.9 262.9,144.8 264.9,148.8 266.8,146.8 268.7,152.7 270.7,148.8 272.6,154.7 274.6,146.8 276.5,152.7 278.4,150.7 280.4,164.6 282.3,160.6 284.2,160.6 286.2,158.7 288.1,160.6 290.1,146.8 292.0,154.7 293.9,146.8 295.9,150.7 297.8,140.8 299.8,146.8 301.7,138.9 303.6,140.8 305.6,138.9 307.5,127.0 309.4,138.9 311.4,134.9 313.3,138.9 315.3,146.8 317.2,138.9 319.1,136.9 321.1,144.8 323.0,148.8 325.0,152.7 326.9,138.9 328.8,154.7 330.8,140.8 332.7,146.8 334.6,152.7 336.6,150.7 338.5,152.7 340.5,152.7 342.4,150.7 344.3,144.8 346.3,136.9 348.2,129.0 350.2,105.2 352.1,127.0 354.0,127.0 356.0,115.1 357.9,117.1 359.8,111.1 361.8,119.1 363.7,115.1 365.7,117.1 367.6,130.9 369.5,130.9 371.5,130.9 373.4,144.8 375.4,142.8 377.3,140.8 379.2,134.9 381.2,154.7 383.1,152.7 385.0,160.6 387.0,148.8 388.9,146.8 390.9,140.8 392.8,146.8 394.7,148.8 396.7,154.7 398.6,146.8 400.6,146.8 402.5,142.8 404.4,134.9 406.4,132.9 408.3,121.0 410.2,115.1 412.2,129.0 414.1,123.0 416.1,119.1 418.0,119.1 419.9,121.0 421.9,117.1 423.8,134.9 425.8,132.9 427.7,129.0 429.6,134.9 431.6,136.9 433.5,115.1 435.4,129.0 437.4,127.0 439.3,140.8 441.3,136.9 443.2,127.0 445.1,127.0 447.1,117.1 449.0,127.0 451.0,115.1 452.9,123.0 454.8,109.2 456.8,119.1 458.7,115.1 460.6,107.2 462.6,105.2 464.5,105.2 466.5,115.1 468.4,111.1 470.3,136.9 472.3,144.8 474.2,130.9 476.2,142.8 478.1,138.9 480.0,144.8 482.0,138.9 483.9,146.8 485.8,152.7 487.8,158.7 489.7,152.7 491.7,160.6 493.6,142.8 495.5,138.9 497.5,152.7 499.4,138.9 501.4,142.8 503.3,142.8 505.2,146.8 507.2,146.8 509.1,138.9 511.0,138.9 513.0,144.8 514.9,150.7 516.9,158.7 518.8,156.7 520.7,156.7 522.7,146.8 524.6,154.7 526.6,156.7 528.5,152.7 530.4,158.7 532.4,144.8 534.3,142.8 536.2,156.7 538.2,79.5 540.1,26.0 542.1,61.6 544.0,71.5" fill="none" stroke="#378add" stroke-width="1.8" stroke-linejoin="round"/><circle cx="540.1" cy="26.0" r="4" fill="#378add"/><text x="532.1" y="18.0" text-anchor="end" class="strong">최고 100점 (2026년 10월 3주)</text><text x="40" y="244">2021년 11월 1주</text><text x="544" y="244" text-anchor="end">2026년 11월 1주</text></svg>
       <ul class="list tight" style="margin-top:10px">
         <li><span>5년 동안 대체로 <b>20~50점</b> 사이에서 움직임</span></li>
-        <li><span>2026년 10월에 급등해 <mark>2026-10-18 주가 최고 100점</mark></span></li>
+        <li><span>2026년 10월에 급등해 <mark>10월 3주(10.18~10.24)가 최고 100점</mark></span></li>
       </ul>
     </div>
     <div style="display:flex; flex-direction:column; gap:12px">
@@ -474,13 +502,13 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
         <dl class="info">
           <dt>출처</dt><dd>Google Trends · 대한민국 · 웹 검색</dd>
           <dt>검색어</dt><dd>해외여행</dd>
-          <dt>기간</dt><dd>2021-11-07 ~ 2026-11-01<br><span class="muted sm">날짜는 그 주의 시작일(일요일)</span></dd>
+          <dt>기간</dt><dd>2021년 11월 1주 ~ 2026년 11월 1주<br><span class="muted sm">2021.11.7 ~ 2026.11.7 · 한 주 = 일요일~토요일</span></dd>
           <dt>단위</dt><dd><b class="em">점</b> = 0~100 상대 지수<br><span class="muted sm">가장 많이 검색된 주가 100점<br>검색 횟수나 %가 아님</span></dd>
         </dl>
       </div>
       <div class="row c2" style="gap:10px">
         <div class="stat"><div class="l">평균</div><div class="v">39.7점</div></div>
-        <div class="stat hl"><div class="l">최근값 (2026-11-01)</div><div class="v">77점 <small>평균의 1.9배</small></div></div>
+        <div class="stat hl"><div class="l">최근값 · 2026년 11월 1주</div><div class="v">77점 <small>평균의 1.9배</small></div></div>
         <div class="stat"><div class="l">최대 · 최소</div><div class="v">100점 <small>· 11점</small></div></div>
         <div class="stat hl"><div class="l">최근 추세</div><div class="v">상승 <small>+70.2%</small></div></div>
       </div>
@@ -491,7 +519,7 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
 
 <!-- 6. 전체 구조 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp5" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp5"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-layers"/></svg></div>
     <div><div class="no">03 · 전체 구조</div><h2>화면 · 서버 · DB · AI의 연결</h2></div></div>
   <div class="key"><svg class="ic"><use href="#i-bulb"/></svg>
@@ -521,7 +549,7 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
 
 <!-- 7. 컨텍스트 주입 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp6" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="4.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp6"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="4.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-spark"/></svg></div>
     <div><div class="no">04 · 핵심 원리</div><h2>컨텍스트 주입: 요약을 프롬프트에 넣기</h2></div></div>
   <div class="steps">
@@ -540,10 +568,12 @@ AI 비서 '떠날까'다.
 - 값은 주간 검색 관심도 지수(0~100점)다.
 <span class="k">[답변 규칙]</span>
 - <span class="y">지수 값에는 '77점(100점 만점)'처럼 '점'을 붙인다.</span>
+- <span class="y">주는 '2026년 11월 1주(11.1~11.7)' 형식으로 말한다.</span>
 - <span class="y">요약에 없는 값은 지어내지 말고 모른다고 말한다.</span>
 <span class="k">[데이터 요약]</span>
-- 기간: 2021-11-07 ~ 2026-11-01 · 261주
-- 평균 39.7점 · 최대 100점 · 최소 11점 · 최근값 77점
+- 기간: 2021-11-07 ~ 2026-11-01 (주 시작일 기준) · 261주
+- 최대: 100점, 2026년 10월 3주(10.18~10.24)
+- 최근값: 77점, 2026년 11월 1주(11.1~11.7)
 - 최근 추세: 상승 (최근 8주 평균 60.0, 직전 8주 평균 35.2,
   변화율 +70.2%)</pre>
     <div class="card">
@@ -560,7 +590,7 @@ AI 비서 '떠날까'다.
 
 <!-- 8. 백엔드 설계 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp7" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp7"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.0s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-server"/></svg></div>
     <div><div class="no">05 · 백엔드 설계</div><h2>역할별로 나눈 구조와 입력 검증</h2></div></div>
   <div class="row fill c3">
@@ -597,11 +627,12 @@ AI 비서 '떠날까'다.
 
 <!-- 9. 기능 시연 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp8" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp8"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-monitor"/></svg></div>
     <div><div class="no">06 · 기능 시연</div><h2>배포된 화면 둘러보기</h2></div></div>
   <div class="gallery fill">
     <div class="gtabs" id="demoTabs">
+      <span class="clickhint"><svg class="hand"><use href="#i-hand"/></svg>눌러서 화면 바꾸기</span>
       <button class="on" data-k="chat"><svg class="ic"><use href="#i-chat"/></svg><b>채팅 + 요약</b><span>점 단위 답변, 요약 카드</span></button>
       <button data-k="loading"><svg class="ic"><use href="#i-loader"/></svg><b>로딩 표시</b><span>답변 준비 중 애니메이션</span></button>
       <button data-k="data"><svg class="ic"><use href="#i-db"/></svg><b>데이터 관리</b><span>추가 · 수정 · 삭제</span></button>
@@ -617,7 +648,7 @@ AI 비서 '떠날까'다.
 
 <!-- 10. 배포와 보안 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp9" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="4.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp9"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="4.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-shield"/></svg></div>
     <div><div class="no">07 · 배포와 보안</div><h2>안전하게 배포하기</h2></div></div>
   <div class="row fill" style="grid-template-columns: 1.15fr 1fr">
@@ -646,7 +677,7 @@ AI 비서 '떠날까'다.
 
 <!-- 11. 문제 해결 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp10" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp10"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.0s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-bolt"/></svg></div>
     <div><div class="no">08 · 문제 해결</div><h2>막혔던 곳과 해결 방법</h2></div></div>
   <div class="trouble fill">
@@ -680,7 +711,7 @@ AI 비서 '떠날까'다.
 
 <!-- 12. 한계와 다음 단계 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp11" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp11"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-target"/></svg></div>
     <div><div class="no">09 · 한계와 다음 단계</div><h2>"3월은 어땠어?"에는 아직 못 답해요</h2></div></div>
   <div class="row c2 fill">
@@ -710,7 +741,7 @@ AI 비서 '떠날까'다.
 
 <!-- 13. 체크리스트 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp12" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="4.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp12"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="4.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-list"/></svg></div>
     <div><div class="no">10 · 요구사항 점검</div><h2>요구사항 체크리스트</h2></div>
     <div class="score">
@@ -740,10 +771,10 @@ AI 비서 '떠날까'다.
 
 <!-- 14. 용어 사전 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp13" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp13"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.0s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-book"/></svg></div>
     <div><div class="no">11 · 용어 사전 · 98개</div><h2>단계별로 배운 용어</h2></div></div>
-  <p class="sm muted" style="margin:-6px 0 12px">왼쪽에서 단계를 고르세요. 표기: <b>용어</b> · 영문, 읽는 법 · 쉬운 설명</p>
+  <p class="sm muted" style="margin:-6px 0 12px; display:flex; align-items:center; gap:10px"><span class="clickhint"><svg class="hand"><use href="#i-hand"/></svg>왼쪽 단계를 누르세요</span>표기: <b>용어</b> · 영문, 읽는 법 · 쉬운 설명</p>
   <div class="gl fill">
     <div class="gtab2" id="glTabs"></div>
     <div class="glist" id="glList"></div>
@@ -752,33 +783,28 @@ AI 비서 '떠날까'다.
 
 <!-- 15. 출처 -->
 <section class="slide">
-  <svg class="deco"><use href="#deco"/></svg>
+  <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp14" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp14"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-doc"/></svg></div>
     <div><div class="no">12 · 출처</div><h2>출처와 참고 자료</h2></div></div>
+  <p class="sm" style="margin:-6px 0 12px"><span class="clickhint"><svg class="hand"><use href="#i-hand"/></svg>파란 주소를 누르면 새 창으로 열려요</span></p>
   <div class="src fill">
     <div style="display:flex; flex-direction:column; gap:14px">
-      <div class="card"><h3><svg class="ic"><use href="#i-target"/></svg>과제</h3><ul>
-        <li><span>코디세이 미션 안내 (PDF)<br><span class="muted xs">AI Agent 개발: 나만의 AI 비서 구축</span></span><span></span></li></ul></div>
       <div class="card"><h3><svg class="ic"><use href="#i-chart"/></svg>데이터</h3><ul>
-        <li><span>Google Trends · 검색어 "해외여행"<br><span class="muted xs">대한민국 · 웹 검색 · 주간 · 수집일 2026-11-09</span></span><a href="https://trends.google.com" target="_blank" rel="noopener">trends.google.com <svg class="ic"><use href="#i-ext"/></svg></a></li></ul></div>
+        <li><span>Google Trends · 검색어 "해외여행"<br><span class="muted xs">대한민국 · 웹 검색 · 주간 · 수집일 2026-11-09</span></span><a href="https://trends.google.com" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg>trends.google.com <svg class="ic"><use href="#i-ext"/></svg></a></li></ul></div>
       <div class="card"><h3><svg class="ic"><use href="#i-github"/></svg>프로젝트 기록</h3><ul>
-        <li><span>저장소</span><a href="https://github.com/geunwa/my-ai-assistant" target="_blank" rel="noopener">github.com/geunwa/my-ai-assistant <svg class="ic"><use href="#i-ext"/></svg></a></li>
+        <li><span>저장소</span><a href="https://github.com/geunwa/my-ai-assistant" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg>github.com/geunwa/my-ai-assistant <svg class="ic"><use href="#i-ext"/></svg></a></li>
         <li><span>배포 실행 증빙 (요청과 응답 전문)</span><span class="muted xs">docs/evidence.md</span></li>
         <li><span>변경 기록 · 용어 사전 · 요구사항 대조표</span><span class="muted xs">docs/</span></li>
         <li><span>단계별 화면 캡처</span><span class="muted xs">evidence/</span></li></ul></div>
     </div>
     <div style="display:flex; flex-direction:column; gap:14px">
       <div class="card"><h3><svg class="ic"><use href="#i-book"/></svg>기술 문서</h3><ul>
-        <li><span>FastAPI</span><a href="https://fastapi.tiangolo.com" target="_blank" rel="noopener">fastapi.tiangolo.com <svg class="ic"><use href="#i-ext"/></svg></a></li>
-        <li><span>Pydantic</span><a href="https://docs.pydantic.dev" target="_blank" rel="noopener">docs.pydantic.dev <svg class="ic"><use href="#i-ext"/></svg></a></li>
-        <li><span>Firebase Firestore</span><a href="https://firebase.google.com/docs/firestore" target="_blank" rel="noopener">firebase.google.com/docs/firestore <svg class="ic"><use href="#i-ext"/></svg></a></li>
-        <li><span>OpenAI API</span><a href="https://platform.openai.com/docs" target="_blank" rel="noopener">platform.openai.com/docs <svg class="ic"><use href="#i-ext"/></svg></a></li>
-        <li><span>Render</span><a href="https://render.com/docs" target="_blank" rel="noopener">render.com/docs <svg class="ic"><use href="#i-ext"/></svg></a></li>
-        <li><span>Vercel</span><a href="https://vercel.com/docs" target="_blank" rel="noopener">vercel.com/docs <svg class="ic"><use href="#i-ext"/></svg></a></li></ul></div>
-      <div class="card"><h3><svg class="ic"><use href="#i-spark"/></svg>제작</h3><ul>
-        <li><span>화면 사진 · 그래프 · 아이콘</span><span class="muted xs">직접 촬영 · 직접 작성</span></li>
-        <li><span>로고</span><span class="muted xs">ChatGPT로 제작</span></li>
-        <li><span>코드 작성 도움</span><span class="muted xs">Claude</span></li></ul></div>
+        <li><span>FastAPI</span><a href="https://fastapi.tiangolo.com" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg>fastapi.tiangolo.com <svg class="ic"><use href="#i-ext"/></svg></a></li>
+        <li><span>Pydantic</span><a href="https://docs.pydantic.dev" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg>docs.pydantic.dev <svg class="ic"><use href="#i-ext"/></svg></a></li>
+        <li><span>Firebase Firestore</span><a href="https://firebase.google.com/docs/firestore" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg>firebase.google.com/docs/firestore <svg class="ic"><use href="#i-ext"/></svg></a></li>
+        <li><span>OpenAI API</span><a href="https://platform.openai.com/docs" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg>platform.openai.com/docs <svg class="ic"><use href="#i-ext"/></svg></a></li>
+        <li><span>Render</span><a href="https://render.com/docs" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg>render.com/docs <svg class="ic"><use href="#i-ext"/></svg></a></li>
+        <li><span>Vercel</span><a href="https://vercel.com/docs" target="_blank" rel="noopener"><svg class="hand"><use href="#i-hand"/></svg>vercel.com/docs <svg class="ic"><use href="#i-ext"/></svg></a></li></ul></div>
     </div>
   </div>
 </section>
@@ -786,7 +812,8 @@ AI 비서 '떠날까'다.
 </div></div>
 
 <div id="progress"></div>
-<div id="help">← → 또는 Space: 이동 · F: 전체 화면</div>
+<div id="help">← → 또는 Space: 이동 · F: 전체 화면 · <b>N: 설명글</b></div>
+<div id="notes"><div class="nh"><span id="notesTitle"></span><span>N 키로 닫기</span></div><ol id="notesBody"></ol></div>
 <div id="nav"><button id="prev" aria-label="이전 장"><svg class="ic"><use href="#i-left"/></svg></button><span id="count"></span><button id="next" aria-label="다음 장"><svg class="ic"><use href="#i-right"/></svg></button></div>
 <div id="toast">복사했어요</div>
 
@@ -806,6 +833,7 @@ AI 비서 '떠날까'다.
     document.getElementById("count").textContent = (cur + 1) + " / " + slides.length;
     document.getElementById("progress").style.width = ((cur + 1) / slides.length * 100) + "%";
     history.replaceState(null, "", "#" + (cur + 1));
+    if (typeof renderNotes === "function" && notesBox.classList.contains("on")) renderNotes();
   }
   document.getElementById("prev").onclick = () => show(cur - 1);
   document.getElementById("next").onclick = () => show(cur + 1);
@@ -815,6 +843,7 @@ AI 비서 '떠날까'다.
     else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); show(cur - 1); }
     else if (e.key === "Home") show(0);
     else if (e.key === "End") show(slides.length - 1);
+    else if (e.key === "n" || e.key === "N" || e.key === "ㅜ") { notesBox.classList.toggle("on"); renderNotes(); }
     else if (e.key === "f" || e.key === "F") {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
       else document.exitFullscreen();
@@ -822,6 +851,16 @@ AI 비서 '떠날까'다.
   });
   window.addEventListener("resize", fit);
 
+
+  // 설명글 (N 키)
+  const NOTES = [["표지", ["안녕하세요. 제가 만든 서비스는 <b>떠날까</b>입니다.", "과제명은 <b>AI Agent 개발: 나만의 AI 비서 구축</b>입니다.", "떠날까는 지난 5년 동안 사람들이 \"해외여행\"을 얼마나 검색했는지 알고, <b>그 숫자로 답하는 AI 비서</b>입니다.", "화면의 주소 세 개는 서비스, API 문서, GitHub 저장소입니다. 누르면 바로 열리고, 복사 버튼으로 주소를 복사할 수 있습니다.", "무료 서버라서 처음 접속하면 50초 정도 걸릴 수 있습니다."]], ["과제 한눈에 보기", ["먼저 과제를 간단히 소개하겠습니다.", "일반 ChatGPT에 \"이번 달 매출 어때?\"라고 물으면, 내 데이터를 모르니까 일반적인 답만 합니다.", "이 과제는 <b>내 데이터를 이해하고 거기에 맞춰 답하는 AI 서비스</b>를 만드는 것입니다.", "완성해야 하는 결과물은 네 가지입니다. <b>AI 채팅, 데이터 관리, 대화 기록, 배포와 문서화</b>입니다.", "작업은 아래 흐름 순서로 했습니다. 데이터를 분석하고, DB에 저장하고, AI가 그 데이터로 대화하게 만든 뒤, 인터넷에 배포했습니다."]], ["요구사항과 제출 항목", ["요구사항은 여섯 분야, 세부 항목으로는 <b>25개</b>입니다.", "기술은 FastAPI, HTML·CSS·JS, Firestore, GPT 네 가지로 정해져 있고, 화면은 프레임워크 없이 만들어야 합니다.", "배포는 백엔드 Render, 프론트엔드 Vercel로 정해져 있습니다.", "데이터는 시계열 <b>100개 이상</b>, 그리고 기간·개수·통계·추세 요약이 필요합니다.", "API는 데이터 5개, 대화 4개, 채팅 1개로 <b>모두 10개</b>입니다.", "제출은 세 가지입니다. GitHub 저장소 연결, README 작성, 그리고 스크린샷 3장입니다."]], ["같은 질문, 다른 답", ["같은 질문을 두 챗봇에 했을 때 차이를 보여 드리겠습니다.", "왼쪽 일반 챗봇은 계절이나 환율 같은 일반론만 말합니다. 이 문장은 설명을 위해 만든 예시입니다.", "오른쪽 떠날까는 <b>\"2026년 11월 1주 관심도는 77점\"</b>처럼 저장된 데이터의 실제 숫자로 답합니다.", "차이를 만드는 방법은 하나입니다. 질문할 때마다 <b>최신 데이터 요약을 AI에게 함께 보내는 것</b>입니다.", "이 방법은 뒤에서 자세히 설명하겠습니다."]], ["데이터", ["데이터는 구글 트렌드에서 \"해외여행\" 검색 관심도를 가져왔습니다. 대한민국, 웹 검색, 주 단위 5년, <b>261주</b>입니다.", "여기 숫자는 검색 횟수가 아닙니다. 기간 중 가장 많이 검색된 주를 <b>100점</b>으로 두고 나머지를 비교한 상대 점수입니다.", "평균은 39.7점이고, 대부분 20점에서 50점 사이를 오갔습니다.", "2026년 10월에 갑자기 올라서 <b>10월 3주가 100점</b>, 가장 최근인 <b>11월 1주가 77점</b>입니다. 평균의 약 1.9배입니다.", "최근 8주 평균을 그 전 8주와 비교하면 <b>70.2% 올라서</b> 추세를 \"상승\"으로 판단했습니다."]], ["전체 구조", ["전체 구조입니다. 왼쪽에서 오른쪽으로 요청이 흐릅니다.", "사용자가 Vercel에 있는 화면에 들어오면, 화면은 fetch로 Render에 있는 FastAPI 서버를 부릅니다.", "서버는 Firestore에서 데이터를 읽고 쓰고, OpenAI GPT에 질문을 보냅니다.", "중요한 점은 <b>DB와 AI에는 서버만 접근한다</b>는 것입니다. 비밀 키는 Render 환경 변수에만 있고 화면 코드에는 없습니다.", "화면 쪽 환경 변수는 서버 주소 하나뿐이고, 배포할 때 설정 파일로 만들어집니다."]], ["컨텍스트 주입", ["이 과제의 핵심인 <b>컨텍스트 주입</b>입니다. 질문이 들어오면 다섯 단계로 처리합니다.", "질문을 받고, 데이터 요약을 가져오고, 요약과 답변 규칙으로 <b>시스템 프롬프트</b>를 만듭니다.", "그다음 GPT를 부르고, 질문과 답을 대화 기록에 <b>자동으로 저장</b>합니다.", "왼쪽 검은 상자가 GPT에게 실제로 보내는 지시문입니다. 노란 글씨처럼 \"점을 붙여라\", \"모르는 값은 지어내지 마라\" 같은 규칙도 넣었습니다.", "원본 261개를 다 보내지 않고 <b>요약만</b> 보내서 비용이 적고, 데이터를 고치면 다음 질문부터 바로 반영됩니다."]], ["백엔드 설계", ["백엔드는 역할별로 파일을 나눴습니다.", "routers는 <b>어떤 주소로 무엇을 받는지</b>, services는 <b>받아서 무엇을 하는지</b>를 맡습니다.", "입력 검증은 Pydantic으로 했습니다. 2월 30일 같은 없는 날짜나 100점이 넘는 값은 DB에 닿기 전에 <b>422 오류</b>로 막습니다.", "같은 규칙으로 Swagger 문서도 자동으로 만들어집니다.", "오른쪽은 Firestore에서 추가, 조회, 수정, 삭제가 어떻게 동작하는지 정리한 것입니다."]], ["기능 시연", ["실제 배포된 화면입니다. 왼쪽 버튼을 누르면 화면이 바뀝니다.", "<b>채팅</b>: 질문하면 요약을 근거로 답하고, 오른쪽에 요약 카드와 그래프가 보입니다.", "<b>로딩</b>: 답을 기다리는 동안 비행기가 오가는 표시가 나옵니다.", "<b>데이터 관리</b>: 추가, 수정, 삭제를 할 수 있습니다. <b>대화 기록</b>: 지난 대화를 골라 다시 불러오고 이어서 대화할 수 있습니다.", "보너스로 데이터를 CSV나 JSON 파일로 <b>내려받는 기능</b>도 넣었습니다."]], ["배포와 보안", ["배포하면서 지킨 네 가지입니다.", "<b>CORS</b>는 허락한 주소의 화면만 서버를 부를 수 있게 하는 규칙입니다. 우리 Vercel 주소와 내 PC 주소만 허용했습니다.", "<b>키</b>는 코드에 넣지 않았습니다. 내 PC에서는 .env 파일, 배포 서버에서는 Render 환경 변수에 넣었고, .env는 GitHub에 올라가지 않게 막았습니다.", "<b>콜드 스타트</b>: 무료 서버는 쉬다가 깨어날 때 50초쯤 걸려서, 화면을 열면 서버부터 깨우고 다시 시도 버튼을 보여 줍니다.", "<b>비용</b>은 답변 길이 제한과, 이전 대화를 10개만 보내는 방식으로 줄였습니다."]], ["문제 해결", ["진행하면서 막혔던 여섯 가지입니다. 증상, 원인, 해결 순서로 보시면 됩니다.", "가장 기억에 남는 것은 <b>AI 답변이 빈칸으로 온 문제</b>입니다. 생각하는 모델이 답을 쓰기 전에 글자 수 한도를 다 써 버렸고, 한도를 2000으로 늘려 해결했습니다.", "또 하나는 <b>숫자의 뜻을 알 수 없던 문제</b>입니다. 39.7이 횟수인지 퍼센트인지 몰라서 단위를 \"점\"으로 통일하고 출처를 적었습니다.", "마지막은 요구사항 점검표를 만들다가 <b>빠진 항목을 직접 찾아 고친 경험</b>입니다.", "모든 수정은 변경 기록 문서에 남겼습니다."]], ["한계와 다음 단계", ["아쉬운 점도 있습니다. \"3월은 어땠어?\"처럼 특정 기간을 물으면 아직 답하지 못합니다.", "AI에게 요약만 보내기 때문에 월별 값을 볼 수 없어서입니다.", "대신 <b>모르는 값을 지어내지 않고</b> 모른다고 솔직하게 답하도록 만들었습니다.", "다음에는 <b>Function Calling</b>으로 AI가 필요한 기간의 데이터를 직접 찾아보게 하고 싶습니다.", "월별 지표, 다크 모드, 오류 문구 한국어로 바꾸기도 다음 할 일입니다."]], ["요구사항 체크리스트", ["과제 요구사항을 모두 지켰는지 점검한 결과입니다.", "필수 점검 항목 <b>12개를 모두 충족</b>했습니다.", "보너스는 <b>그래프와 내보내기 두 가지</b>를 구현했고, 다크 모드와 Function Calling은 다음 단계로 남겼습니다.", "항목마다 어느 파일에서 구현했는지와 증빙은 저장소의 요구사항 대조표 문서에 정리했습니다."]], ["용어 사전", ["과제를 하면서 배운 용어를 단계별로 정리했습니다. 모두 <b>98개</b>입니다.", "왼쪽에서 단계를 누르면 그 단계의 용어가 나옵니다.", "예를 들어 <b>CORS</b>는 다른 주소의 화면이 내 서버를 불러도 되는지 정하는 규칙이고, <b>시스템 프롬프트</b>는 AI에게 미리 주는 숨은 지시문입니다.", "발표가 끝난 뒤에도 필요할 때 찾아보실 수 있습니다."]], ["출처", ["참고한 자료입니다.", "데이터는 구글 트렌드에서 2026년 11월 9일에 수집했습니다.", "기술 문서는 FastAPI, Pydantic, Firestore, OpenAI, Render, Vercel 공식 문서를 참고했습니다.", "코드, 변경 기록, 실행 증빙은 모두 GitHub 저장소에 있습니다.", "들어 주셔서 감사합니다."]]];
+  const notesBox = document.getElementById("notes");
+  function renderNotes() {
+    const n = NOTES[cur] || ["", []];
+    document.getElementById("notesTitle").textContent = (cur + 1) + "장 · " + n[0] + " · 설명글";
+    document.getElementById("notesBody").innerHTML = n[1].map((t) => "<li>" + t + "</li>").join("");
+    notesBox.scrollTop = 0;
+  }
   // 복사 버튼
   const toast = document.getElementById("toast");
   function flash(msg) {
