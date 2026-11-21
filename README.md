@@ -152,7 +152,7 @@ python scripts/check_firestore.py       # 적재 확인
 
 ### 1. 채팅 (데이터 요약과 질문·답변)
 
-![채팅과 데이터 요약](evidence/step10-2_chat-summary.png)
+![채팅과 데이터 요약](evidence/step14-2_unit.png)
 
 ### 2. 데이터 관리
 
