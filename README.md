@@ -167,4 +167,5 @@ python scripts/check_firestore.py       # 적재 확인
 - [변경 기록](docs/changelog.md)
 - [용어 사전](docs/glossary.md)
 - [요구사항 대조표](docs/requirements-check.md)
+- [동료평가 발표 자료](docs/presentation.html) (내려받아 브라우저로 열기, ← → 로 이동)
 - 단계별 증빙: [evidence](evidence/)
