@@ -156,11 +156,11 @@ python scripts/check_firestore.py       # 적재 확인
 
 ### 2. 데이터 관리
 
-![데이터 관리](evidence/step10-2_data.png)
+![데이터 관리](evidence/step14-2_data.png)
 
 ### 3. 대화 기록 (목록과 불러오기)
 
-![대화 기록](evidence/step10-2_history.png)
+![대화 기록](evidence/step14-2_history.png)
 
 ## 참고 문서
 
