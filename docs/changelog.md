@@ -88,4 +88,5 @@
 
 ### 확인
 - 이 저장소 사본에서 build.sh를 세 경우로 실행했다: 환경 변수 없음(기존 config.js 복사), 정상 주소(새 config.js 생성), 따옴표가 섞인 값(오류로 중단).
-- Vercel 환경 변수 설정과 재배포 후 화면 확인: evidence/step14_vercel-env.png (촬영 예정).
+- Vercel 환경 변수 설정: evidence/step14_vercel-env.png (API_BASE_URL, Production).
+- 재배포 빌드 로그: evidence/step14_vercel-build-log.png. 커밋 1f122f3, 빌드 캐시 없이 실행, "config.js: Vercel 환경 변수 API_BASE_URL 사용" 줄이 찍혔다. 값은 Vercel이 민감 변수로 보고 [REDACTED]로 가렸다(공개 주소라 숨길 필요는 없지만 동작에는 영향 없음).

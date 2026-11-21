@@ -24,7 +24,7 @@
 | 4-7 | `POST /api/chat`: 요약 조회 → 시스템 프롬프트 삽입 → GPT 호출 → conversations 자동 저장 | `backend/app/services/chat_service.py` | step08_chat | 충족 (참고 1) |
 | 4-8 | Render 배포, 배포 URL `/docs`, 콜드스타트 안내 | Render Web Service, `frontend/app.js` 서버 깨우기·다시 시도 | step09_render-live, step09_render-swagger | 충족 |
 | 4-9 | 바닐라 HTML/CSS/JS: 채팅(입력·표시·로딩), 데이터 관리, 대화 기록, 요약 표시 | `frontend/` | step10-2 4장 | 충족 |
-| 4-10 | Vercel 배포, 환경 변수로 API 서버 URL 설정 | `frontend/vercel.json`, `frontend/build.sh`, Vercel 환경 변수 `API_BASE_URL` | step11_vercel-chat, step14_vercel-env | 충족 (STEP 14에서 보완, 참고 2) |
+| 4-10 | Vercel 배포, 환경 변수로 API 서버 URL 설정 | `frontend/vercel.json`, `frontend/build.sh`, Vercel 환경 변수 `API_BASE_URL` | step11_vercel-chat, step14_vercel-env, step14_vercel-build-log | 충족 (STEP 14에서 보완, 참고 2) |
 | 4-10 | README: 소개, 기술 스택, 배포 URL 3개, 로컬 실행, 환경 변수, 스크린샷 3장 | `README.md` | GitHub 저장소 첫 화면 | 충족 |
 
 ## 제약 사항
