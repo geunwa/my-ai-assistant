@@ -91,7 +91,7 @@
 
         <aside class="card summary-card">
           <div class="card-head"><h2>데이터 요약</h2></div>
-          <p class="hint">주간 검색 관심도 지수 · 기간 중 검색이 가장 많았던 주 = 100 (검색 횟수 아님)</p>
+          <p class="hint">단위: 점 (주간 검색 관심도 지수) · 기간 중 검색이 가장 많았던 주 = <span class="nowrap">100점</span> · 검색 횟수나 %가 아니에요</p>
           <div id="summary" class="summary"></div>
           <div class="chart-wrap">
             <div id="chart"></div>
@@ -107,7 +107,7 @@
         <div class="card-head"><h2>데이터 추가</h2></div>
         <form id="add-form" class="add-form">
           <label>주 시작일<input id="add-date" type="date" required></label>
-          <label>관심도 지수 (0~100)<input id="add-value" type="number" min="0" max="100" step="any" required></label>
+          <label>관심도 지수 (0~100점)<input id="add-value" type="number" min="0" max="100" step="any" required></label>
           <label class="grow">메모<input id="add-memo" type="text" maxlength="200" placeholder="선택"></label>
           <button type="submit" class="btn btn-primary">추가</button>
         </form>
@@ -125,7 +125,7 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>주 시작일</th><th>관심도 지수 (0~100)</th><th>메모</th><th class="actions-col">관리</th></tr>
+              <tr><th>주 시작일</th><th>관심도 지수 (0~100점)</th><th>메모</th><th class="actions-col">관리</th></tr>
             </thead>
             <tbody id="data-body"></tbody>
           </table>

@@ -150,23 +150,18 @@
   // ---------- 데이터 요약 + 그래프 ----------
   let allData = [];   // 날짜 오름차순
 
-  // 숫자 뒤에 붙는 조사(이/가): 마지막 숫자를 읽었을 때 받침이 있으면 "이"
-  function josaIGa(numText) {
-    const last = numText.replace(/[^0-9]/g, "").slice(-1);   // 영·일·삼·육·칠·팔은 받침이 있다
-    return last && "013678".indexOf(last) >= 0 ? "이" : "가";
-  }
-
   // 서버의 추세 문장에서 숫자를 그대로 꺼내 읽기 쉬운 문장으로 바꾼다.
   // 형식이 다르면(예: 판단 불가) 서버 문구를 그대로 보여 준다.
   function trendSentence(trend) {
     const m = /^(\S+) \(최근 8주 평균 ([\d.]+), 직전 8주 평균 ([\d.]+), 변화율 ([+-]?[\d.]+)%\)/.exec(trend || "");
     if (!m) return trend;
     const label = m[1], recent = m[2], previous = m[3], rate = m[4];
-    const head = "최근 8주 평균 " + recent + josaIGa(recent) + " 직전 8주 " + previous;
+    // 지수 값에는 "점"을 붙인다 ("점" 뒤 조사는 받침이 있어 "이"). %는 변화율에만 쓴다.
+    const head = "최근 8주 평균 " + recent + "점이 직전 8주 " + previous + "점";
     const magnitude = rate.replace(/^[+-]/, "");
     if (label === "상승") return head + "보다 " + magnitude + "% 높아요 → 상승";
     if (label === "하락") return head + "보다 " + magnitude + "% 낮아요 → 하락";
-    return head + "와 비슷해요 (변화율 " + rate + "%) → " + label;
+    return head + "과 비슷해요 (변화율 " + rate + "%) → " + label;
   }
 
   // 카드 하나를 만든다. value는 { main, of }(숫자 카드) 또는 { text }(문장 카드)
@@ -192,21 +187,22 @@
       return;
     }
     const m = s.metrics;
-    const OF = "/ 100";
+    const P = "점";          // 관심도 지수의 단위
+    const OF = "/ 100점";
     const years = Math.round(s.count / 52);
     const countText = s.count + "주" + (years >= 1 ? " (약 " + years + "년)" : "");
 
     root.appendChild(stat("기간", { main: s.period }, [{ text: "날짜 = 그 주의 시작일(일요일)" }], "wide period"));
     root.appendChild(stat("데이터 수", { main: countText }));
-    root.appendChild(stat("평균", { main: String(m.average), of: OF }));
-    root.appendChild(stat("최대", { main: String(m.max.value), of: OF }, [{ text: m.max.date }], "max"));
-    root.appendChild(stat("최소", { main: String(m.min.value), of: OF }, [{ text: m.min.date }]));
+    root.appendChild(stat("평균", { main: m.average + P, of: OF }));
+    root.appendChild(stat("최대", { main: m.max.value + P, of: OF }, [{ text: m.max.date }], "max"));
+    root.appendChild(stat("최소", { main: m.min.value + P, of: OF }, [{ text: m.min.date }]));
 
     const latestSubs = [{ text: m.latest.date }];
     if (m.average > 0) {
       latestSubs.push({ text: "평균의 약 " + (m.latest.value / m.average).toFixed(1) + "배", strong: true });
     }
-    root.appendChild(stat("최근값", { main: String(m.latest.value), of: OF }, latestSubs, "latest"));
+    root.appendChild(stat("최근값", { main: m.latest.value + P, of: OF }, latestSubs, "latest"));
     root.appendChild(stat("최근 추세", { text: trendSentence(s.trend) }, null, "wide"));
   }
 
@@ -230,8 +226,8 @@
       svg.appendChild(svgEl("line", { x1: padL, x2: W - padR, y1: y(v), y2: y(v), stroke: "#e3eef9" }));
       svg.appendChild(text({ x: padL - 5, y: y(v) + 4, "text-anchor": "end" }, String(v)));
     });
-    // 세로축 제목
-    svg.appendChild(text({ x: 11, y: (padT + H - padB) / 2, "text-anchor": "middle", transform: "rotate(-90 11 " + (padT + H - padB) / 2 + ")" }, "관심도 지수"));
+    // 세로축 단위 (세로로 돌린 한글은 일부 브라우저에서 깨져 보여 가로로 쓴다)
+    svg.appendChild(text({ x: padL - 5, y: padT - 14, "text-anchor": "end" }, "(점)"));
 
     svg.appendChild(svgEl("polyline", {
       points: rows.map((r, i) => x(i).toFixed(1) + "," + y(r.value).toFixed(1)).join(" "),
@@ -247,7 +243,7 @@
     svg.appendChild(plane);
     const onRight = maxIdx > rows.length / 2;
     svg.appendChild(text({ x: onRight ? mx - 14 : mx + 14, y: my - 6, "text-anchor": onRight ? "end" : "start", fill: "#1f2d3d", "font-weight": "700" },
-      "최고 " + rows[maxIdx].value + " (" + rows[maxIdx].date + ")"));
+      "최고 " + rows[maxIdx].value + "점 (" + rows[maxIdx].date + ")"));
 
     // 가로축: 처음과 끝 날짜
     svg.appendChild(text({ x: x(0), y: H - 5, "text-anchor": "start" }, rows[0].date));
