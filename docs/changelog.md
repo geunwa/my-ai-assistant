@@ -73,3 +73,19 @@
 ### 확인
 - 헤드리스 브라우저에서 가짜 데이터 2건(쉼표와 따옴표가 든 메모 포함)으로 두 버튼을 눌러, 파일 이름과 내용이 위 규칙대로 나오는지 확인했다.
 - 배포 화면 확인과 증빙: evidence/step13_export.png (Vercel 배포 화면에서 두 버튼과 내려받은 파일 2개 확인. 브라우저 다운로드 목록 중 이 작업과 관계없는 파일 7개는 이미지에서 지웠다).
+
+## STEP 14: 요구사항 대조와 API 주소 환경 변수 보완
+
+### 발견한 문제
+- 미션 PDF 4-10 "Vercel에 배포하고, 환경 변수로 API 서버 URL을 설정한다"를 충족하지 못했다. API 주소가 frontend/config.js에 직접 적혀 있었다.
+
+### 바꾼 것
+- frontend/build.sh 추가: 화면 파일을 dist 폴더로 복사하고, Vercel 환경 변수 API_BASE_URL이 있으면 그 값으로 dist/config.js를 만든다. 값이 http(s) 주소 형식이 아니면 배포를 멈춘다. 값이 없으면 저장소의 config.js를 쓴다.
+- frontend/vercel.json 추가: 빌드 명령 `sh build.sh`, 배포 폴더 `dist`.
+- .gitignore에 frontend/dist/ 추가. frontend/config.js 주석을 새 방식에 맞게 수정.
+- README: 프론트엔드 환경 변수 API_BASE_URL 표, 폴더 구조, 보너스 범위(일부 구현) 추가.
+- docs/requirements-check.md 추가: 요구사항, 구현 위치, 증빙, 결과 대조표.
+
+### 확인
+- 이 저장소 사본에서 build.sh를 세 경우로 실행했다: 환경 변수 없음(기존 config.js 복사), 정상 주소(새 config.js 생성), 따옴표가 섞인 값(오류로 중단).
+- Vercel 환경 변수 설정과 재배포 후 화면 확인: evidence/step14_vercel-env.png (촬영 예정).

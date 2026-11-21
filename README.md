@@ -30,6 +30,8 @@
 | 데이터 시각화 | 채팅 탭 요약 카드 | 261주 관심도 지수 그래프, 최고점 표시 |
 | 데이터 내보내기 | 데이터 관리 탭 | CSV(엑셀 한글 호환), JSON 내려받기 |
 
+PDF 보너스 중 "인사이트·UX 고도화"의 일부(그래프, 내보내기)만 구현했습니다. 다크 모드, 요약 API 지표 추가, Function Calling은 구현하지 않았습니다.
+
 ## 기술 스택
 
 | 구분 | 사용 기술 |
@@ -83,6 +85,7 @@ my-ai-assistant/
 │  ├─ requirements.txt
 │  └─ .env.example         환경 변수 예시
 ├─ frontend/               index.html, style.css, app.js, config.js, assets/
+│                          build.sh, vercel.json (Vercel 배포 설정)
 ├─ docs/                   changelog.md, glossary.md
 └─ evidence/               단계별 증빙 스크린샷
 ```
@@ -123,7 +126,7 @@ python scripts/check_firestore.py       # 적재 확인
 
 ### 3. 프론트엔드
 
-`frontend/config.js`의 `API_BASE_URL`을 `http://127.0.0.1:8000`으로 바꾼 뒤, VS Code Live Server 등으로 `frontend/index.html`을 엽니다 (기본 주소 http://127.0.0.1:5500).
+로컬에서는 빌드 없이 `frontend` 폴더를 그대로 엽니다. `frontend/config.js`의 `API_BASE_URL`을 `http://127.0.0.1:8000`으로 바꾼 뒤, VS Code Live Server 등으로 `frontend/index.html`을 엽니다 (기본 주소 http://127.0.0.1:5500).
 
 ## 환경 변수
 
@@ -136,6 +139,12 @@ python scripts/check_firestore.py       # 적재 확인
 | `OPENAI_MODEL` | 아니오 | 사용할 모델. 기본값 `gpt-4o-mini` |
 | `OPENAI_MAX_TOKENS` | 아니오 | 답변 최대 토큰. 기본값 400. 추론형 모델은 추론에도 토큰을 쓰므로 넉넉히 설정 |
 | `OPENAI_BASE_URL` | 아니오 | OpenAI 호환 서버를 쓸 때만 설정 |
+
+위 변수는 백엔드(`backend/.env`, Render)에 설정합니다. 프론트엔드(Vercel)는 아래 1개를 씁니다.
+
+| 이름 | 필수 | 설명 |
+|---|---|---|
+| `API_BASE_URL` | 예 (배포) | 백엔드 API 주소. Vercel 배포 때 `frontend/build.sh`가 이 값으로 `config.js`를 만듭니다. 없으면 저장소의 `config.js` 기본값을 씁니다 |
 
 `.env`와 서비스 계정 키 파일은 `.gitignore`로 저장소에서 제외합니다.
 
@@ -157,4 +166,5 @@ python scripts/check_firestore.py       # 적재 확인
 
 - [변경 기록](docs/changelog.md)
 - [용어 사전](docs/glossary.md)
+- [요구사항 대조표](docs/requirements-check.md)
 - 단계별 증빙: [evidence](evidence/)

@@ -128,3 +128,10 @@
 - CSV(Comma-Separated Values, 씨에스브이) - 쉼표로 칸을 나눈 표 형식 텍스트 파일. 엑셀에서 바로 열린다.
 - JSON(JavaScript Object Notation, 제이슨) - 이름과 값을 중괄호·대괄호로 묶어 적는 데이터 형식. API가 주고받는 형식과 같다.
 - Blob(Binary Large Object, 블롭) - 브라우저에서 파일 내용을 담아 두는 덩어리. 서버 없이 화면에서 바로 파일을 만들어 내려받을 때 쓴다.
+
+## STEP 14
+
+- 빌드(Build, 빌드) - 배포 전에 파일을 복사·생성해 내보낼 결과물을 만드는 과정. Vercel이 배포 때마다 build.sh를 실행한다.
+- 빌드 시점 주입(Build-time Injection, 빌드 타임 인젝션) - 실행 중이 아니라 빌드할 때 환경 변수 값을 파일에 써 넣는 방식. 정적 사이트는 브라우저가 환경 변수를 직접 읽지 못해서 이 방식을 쓴다.
+- vercel.json(버셀 제이슨) - Vercel 배포 설정 파일. 빌드 명령과 배포 폴더를 적는다.
+- 요구사항 추적표(Requirements Traceability Matrix, 리콰이어먼츠 트레이서빌리티 매트릭스) - 요구사항마다 구현 위치와 증빙을 짝지어 빠진 것을 찾는 표. docs/requirements-check.md.
