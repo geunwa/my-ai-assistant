@@ -393,6 +393,53 @@
     }
   });
 
+  // ---------- 데이터 내보내기 (보너스) ----------
+  // 서버에서 받아 둔 전체 데이터(allData, 날짜 오름차순)를 파일로 내려받는다.
+  function today() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+
+  function download(filename, content, type) {
+    const url = URL.createObjectURL(new Blob([content], { type: type }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // 쉼표·따옴표·줄바꿈이 든 칸은 따옴표로 감싸고, 안의 따옴표는 두 번 쓴다
+  function csvCell(v) {
+    const s = String(v == null ? "" : v);
+    return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+
+  function exportData(format) {
+    if (!allData.length) {
+      toast("내려받을 데이터가 없어요.");
+      return;
+    }
+    const rows = allData.map((r) => ({ date: r.date, value: r.value, memo: r.memo || "" }));
+    const name = "tteonalkka_data_" + today();
+    if (format === "csv") {
+      const lines = ["date,value,memo"].concat(
+        rows.map((r) => [r.date, r.value, r.memo].map(csvCell).join(","))
+      );
+      // 맨 앞 BOM(﻿): 엑셀에서 한글 메모가 깨지지 않게 한다
+      download(name + ".csv", "﻿" + lines.join("\r\n") + "\r\n", "text/csv;charset=utf-8");
+    } else {
+      download(name + ".json", JSON.stringify(rows, null, 2), "application/json;charset=utf-8");
+    }
+    toast(rows.length + "건을 " + format.toUpperCase() + " 파일로 내려받았어요.", true);
+  }
+
+  $("export-csv").addEventListener("click", () => exportData("csv"));
+  $("export-json").addEventListener("click", () => exportData("json"));
+
   $("page-prev").addEventListener("click", () => { page -= 1; editingId = null; renderTable(); });
   $("page-next").addEventListener("click", () => { page += 1; editingId = null; renderTable(); });
 

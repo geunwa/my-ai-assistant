@@ -109,3 +109,22 @@
 - 변경 기록(Changelog, 체인지로그) - 무엇을 왜 어떻게 바꿨는지 날짜순으로 남기는 문서. docs/changelog.md.
 - 애플리케이션 제어 정책(Application Control Policy, 애플리케이션 컨트롤 폴리시) - 신뢰하지 않는 프로그램 파일의 실행을 Windows가 막는 보안 기능.
 - 네이티브 확장 모듈(Native Extension, 네이티브 익스텐션) - 파이썬 대신 C 등으로 만들어 속도를 높인 파일(.pyd, DLL). 서명이 없으면 보안 정책에 차단될 수 있다.
+
+## STEP 11
+
+- Vercel(버셀) - HTML·CSS·JS 같은 웹 화면을 인터넷에 올려 주는 배포 서비스. 프론트엔드를 tteonalkka.vercel.app에 올렸다.
+- 정적 사이트(Static Site, 스태틱 사이트) - 서버에서 계산하지 않고 미리 만든 파일을 그대로 보내는 웹사이트. 이 프로젝트의 frontend 폴더가 해당한다.
+- 루트 디렉터리(Root Directory, 루트 디렉터리) - 배포 서비스가 저장소 안에서 기준으로 삼는 폴더. Vercel은 frontend로 지정했다.
+- 오리진(Origin, 오리진) - 웹 주소에서 프로토콜·도메인·포트를 합친 부분. CORS 허용 목록(ALLOWED_ORIGINS)에 적는 단위다.
+
+## STEP 12
+
+- README(리드미) - 저장소 첫 화면에 보이는 설명 문서. 소개, 실행 방법, 배포 주소 등을 적는다.
+- 마크다운(Markdown, 마크다운) - #, -, | 같은 기호로 제목·목록·표를 쓰는 간단한 문서 형식. README.md가 이 형식이다.
+
+## STEP 13 (보너스)
+
+- 내보내기(Export, 익스포트) - 화면 속 데이터를 파일로 저장하는 기능. 데이터 관리 탭에 CSV·JSON 내려받기 버튼을 넣었다.
+- CSV(Comma-Separated Values, 씨에스브이) - 쉼표로 칸을 나눈 표 형식 텍스트 파일. 엑셀에서 바로 열린다.
+- JSON(JavaScript Object Notation, 제이슨) - 이름과 값을 중괄호·대괄호로 묶어 적는 데이터 형식. API가 주고받는 형식과 같다.
+- Blob(Binary Large Object, 블롭) - 브라우저에서 파일 내용을 담아 두는 덩어리. 서버 없이 화면에서 바로 파일을 만들어 내려받을 때 쓴다.
