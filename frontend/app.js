@@ -147,6 +147,30 @@
     t.addEventListener("click", () => showTab(t.dataset.tab));
   });
 
+  // ---------- 주 표기 ----------
+  // 날짜(그 주의 시작일, 일요일)를 "2026년 11월 1주 (11.1~11.7)"처럼 바꾼다.
+  // n주 = 그 달의 n번째 일요일에 시작하는 주
+  function parseDate(iso) {
+    const [y, mo, d] = iso.split("-").map(Number);
+    return new Date(Date.UTC(y, mo - 1, d));
+  }
+  function weekName(iso) {
+    const d = parseDate(iso);
+    return d.getUTCFullYear() + "년 " + (d.getUTCMonth() + 1) + "월 " + (Math.floor((d.getUTCDate() - 1) / 7) + 1) + "주";
+  }
+  function weekRange(iso) {
+    const d = parseDate(iso);
+    const e = new Date(d.getTime() + 6 * 86400000);
+    return (d.getUTCMonth() + 1) + "." + d.getUTCDate() + "~" + (e.getUTCMonth() + 1) + "." + e.getUTCDate();
+  }
+  function weekLabel(iso) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? weekName(iso) + " (" + weekRange(iso) + ")" : (iso || "");
+  }
+  function shortWeek(iso) {
+    const d = parseDate(iso);
+    return (d.getUTCMonth() + 1) + "월 " + (Math.floor((d.getUTCDate() - 1) / 7) + 1) + "주";
+  }
+
   // ---------- 데이터 요약 + 그래프 ----------
   let allData = [];   // 날짜 오름차순
 
@@ -192,13 +216,18 @@
     const years = Math.round(s.count / 52);
     const countText = s.count + "주" + (years >= 1 ? " (약 " + years + "년)" : "");
 
-    root.appendChild(stat("기간", { main: s.period }, [{ text: "날짜 = 그 주의 시작일(일요일)" }], "wide period"));
+    const [first, last] = (s.period || "").split(" ~ ");
+    const periodMain = first && last ? weekName(first) + " ~ " + weekName(last) : s.period;
+    const periodSub = first && last
+      ? first.replace(/-/g, ".") + " ~ " + new Date(parseDate(last).getTime() + 6 * 86400000).toISOString().slice(0, 10).replace(/-/g, ".") + " · 한 주 = 일요일~토요일"
+      : "";
+    root.appendChild(stat("기간", { main: periodMain }, [{ text: periodSub }], "wide period"));
     root.appendChild(stat("데이터 수", { main: countText }));
     root.appendChild(stat("평균", { main: m.average + P, of: OF }));
-    root.appendChild(stat("최대", { main: m.max.value + P, of: OF }, [{ text: m.max.date }], "max"));
-    root.appendChild(stat("최소", { main: m.min.value + P, of: OF }, [{ text: m.min.date }]));
+    root.appendChild(stat("최대", { main: m.max.value + P, of: OF }, [{ text: weekLabel(m.max.date) }], "max"));
+    root.appendChild(stat("최소", { main: m.min.value + P, of: OF }, [{ text: weekLabel(m.min.date) }]));
 
-    const latestSubs = [{ text: m.latest.date }];
+    const latestSubs = [{ text: weekLabel(m.latest.date) }];
     if (m.average > 0) {
       latestSubs.push({ text: "평균의 약 " + (m.latest.value / m.average).toFixed(1) + "배", strong: true });
     }
@@ -243,11 +272,11 @@
     svg.appendChild(plane);
     const onRight = maxIdx > rows.length / 2;
     svg.appendChild(text({ x: onRight ? mx - 14 : mx + 14, y: my - 6, "text-anchor": onRight ? "end" : "start", fill: "#1f2d3d", "font-weight": "700" },
-      "최고 " + rows[maxIdx].value + "점 (" + rows[maxIdx].date + ")"));
+      "최고 " + rows[maxIdx].value + "점 (" + weekName(rows[maxIdx].date) + ")"));
 
     // 가로축: 처음과 끝 날짜
-    svg.appendChild(text({ x: x(0), y: H - 5, "text-anchor": "start" }, rows[0].date));
-    svg.appendChild(text({ x: x(rows.length - 1), y: H - 5, "text-anchor": "end" }, rows[rows.length - 1].date));
+    svg.appendChild(text({ x: x(0), y: H - 5, "text-anchor": "start" }, weekName(rows[0].date)));
+    svg.appendChild(text({ x: x(rows.length - 1), y: H - 5, "text-anchor": "end" }, weekName(rows[rows.length - 1].date)));
     root.appendChild(svg);
   }
 
@@ -301,7 +330,9 @@
 
   function viewRow(row) {
     const tr = el("tr");
-    tr.appendChild(el("td", null, row.date));
+    const dateTd = el("td", null, row.date);
+    dateTd.appendChild(el("span", "week-tag", shortWeek(row.date)));
+    tr.appendChild(dateTd);
     tr.appendChild(el("td", null, String(row.value)));
     tr.appendChild(el("td", null, row.memo || ""));
     const td = el("td");

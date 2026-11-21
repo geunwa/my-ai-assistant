@@ -1,4 +1,6 @@
 """AI 비서의 답변을 만든다: 요약을 시스템 프롬프트에 넣고 OpenAI를 호출한다."""
+from datetime import date, timedelta
+
 import openai
 
 from app.config import get_openai_api_key, get_openai_max_tokens, get_openai_model
@@ -20,6 +22,20 @@ class ChatError(Exception):
 SOURCE_TEXT = "Google Trends, 검색어 '해외여행', 대한민국, 웹 검색, 수집일 2026-11-09"
 
 
+def week_label(iso: str) -> str:
+    """주 시작일(일요일)을 '2026년 11월 1주(11.1~11.7)'처럼 바꾼다.
+
+    n주 = 그 달의 n번째 일요일에 시작하는 주. 형식이 다르면 그대로 돌려준다.
+    """
+    try:
+        start = date.fromisoformat(iso)
+    except (TypeError, ValueError):
+        return str(iso)
+    end = start + timedelta(days=6)
+    nth = (start.day - 1) // 7 + 1
+    return f"{start.year}년 {start.month}월 {nth}주({start.month}.{start.day}~{end.month}.{end.day})"
+
+
 def build_system_prompt(summary: dict, first_reply: bool = True) -> str:
     """데이터 요약과 단위 설명을 담은 시스템 프롬프트를 만든다.
 
@@ -31,12 +47,12 @@ def build_system_prompt(summary: dict, first_reply: bool = True) -> str:
     else:
         m = summary["metrics"]
         data_lines = [
-            f"- 기간: {summary['period']}",
+            f"- 기간: {summary['period']} (주 시작일 기준)",
             f"- 데이터 개수: {summary['count']}주",
             f"- 평균: 관심도 지수 {m['average']}점",
-            f"- 최대: 관심도 지수 {m['max']['value']}점 ({m['max']['date']} 주)",
-            f"- 최소: 관심도 지수 {m['min']['value']}점 ({m['min']['date']} 주)",
-            f"- 최근값: 관심도 지수 {m['latest']['value']}점 ({m['latest']['date']} 주)",
+            f"- 최대: 관심도 지수 {m['max']['value']}점, {week_label(m['max']['date'])}",
+            f"- 최소: 관심도 지수 {m['min']['value']}점, {week_label(m['min']['date'])}",
+            f"- 최근값: 관심도 지수 {m['latest']['value']}점, {week_label(m['latest']['date'])}",
             f"- 최근 추세: {summary['trend']} (괄호 안 평균은 점, 변화율은 %)",
         ]
         data_text = "\n".join(data_lines)
@@ -55,11 +71,12 @@ def build_system_prompt(summary: dict, first_reply: bool = True) -> str:
         f"- 출처: {SOURCE_TEXT}",
         "- 값은 주간 검색 관심도 지수(0~100점)다. 기간 중 검색이 가장 많았던 주가 100점이며, "
         "실제 검색 횟수나 출국자 수가 아니다.",
-        "- 날짜는 그 주의 시작일(일요일)이다.",
+        "- 한 주는 일요일에 시작한다. 데이터의 날짜는 그 주의 시작일이다.",
         "",
         "[답변 규칙]",
         "- 지수 값을 말할 때는 '관심도 지수 77점(100점 만점)'처럼 반드시 '점'을 붙인다. "
         "지수 값에 %를 쓰지 않는다. %는 두 값의 변화율을 말할 때만 쓴다.",
+        "- 주를 말할 때는 '2026-11-01' 같은 날짜 대신 요약에 적힌 '2026년 11월 1주(11.1~11.7)' 형식을 그대로 쓴다.",
         f"- {scale_rule}",
         "- 굵게(**)와 줄 앞의 '- ' 목록 외의 마크다운(제목 #, 표, 코드 블록)은 쓰지 않는다.",
         "- 아래 요약에 없는 값, 원인, 실제 출국자 수는 지어내지 말고 모른다고 말한다.",

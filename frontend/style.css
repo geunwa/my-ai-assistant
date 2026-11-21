@@ -209,3 +209,4 @@ td input[type="number"] { width: 90px; }
 }
 
 .nowrap { white-space: nowrap; }
+.week-tag { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: var(--sky); color: var(--muted); font-size: 12px; }
