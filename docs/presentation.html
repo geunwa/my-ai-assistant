@@ -6,7 +6,7 @@
 <title>떠날까 · AI Agent 개발: 나만의 AI 비서 구축</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root {
@@ -234,6 +234,22 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
 #help { position: fixed; left: 18px; bottom: 16px; font-size: 12.5px; color: var(--muted); z-index: 5; }
 #toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); background: var(--text); color: #fff; padding: 9px 18px; border-radius: 999px; font-size: 14px; opacity: 0; transition: opacity .2s; z-index: 9; pointer-events: none; }
 #toast.on { opacity: 1; }
+/* 손글씨 메모 */
+.memo { position: absolute; z-index: 3; font-family: "Nanum Pen Script", "Jua", cursive; font-size: 25px; line-height: 1.08; color: #b4541a;
+  transform: rotate(-2.5deg); pointer-events: none; white-space: nowrap; }
+.memo b { font-weight: 400; background: linear-gradient(transparent 60%, rgba(250, 199, 117, .7) 60%); }
+.memo::before { content: ""; position: absolute; left: -16px; top: 9px; width: 9px; height: 9px; border-radius: 50%; background: var(--yellow); }
+/* 용어 바로 보기 */
+.tref { white-space: nowrap; cursor: pointer; border-bottom: 1px dashed var(--blue-l); }
+.tref .rd { font-size: .72em; color: var(--muted); margin-left: 2px; font-weight: 500; }
+.tref .qi { width: 13px; height: 13px; margin-left: 2px; vertical-align: 0.05em; color: var(--blue); }
+.tref:hover { background: var(--sky); border-radius: 4px; }
+#pop { position: fixed; z-index: 10; max-width: 340px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px;
+  box-shadow: 0 12px 30px rgba(29, 95, 166, .22); font-size: 14px; line-height: 1.55; display: none; }
+#pop.on { display: block; }
+#pop .pn { font-weight: 800; color: var(--blue-d); font-size: 16px; }
+#pop .ps { display: block; font-size: 12.5px; color: var(--muted); margin: 1px 0 4px; }
+#pop .pc { position: absolute; right: 10px; top: 8px; font-size: 12px; color: var(--muted); }
 /* 클릭 표시 */
 a, button { cursor: pointer; }
 .hand { width: 15px; height: 15px; color: var(--orange); flex: none; animation: tap 1.6s ease-in-out infinite; }
@@ -307,6 +323,7 @@ a, button { cursor: pointer; }
     <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></symbol>
     <symbol id="i-loader" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></symbol>
     <symbol id="i-hand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V10"/><path d="M12 9.5a1.5 1.5 0 0 1 3 0V11"/><path d="M15 10.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-4.7-2.3L3.8 15.4a1.6 1.6 0 0 1 2.5-2L9 16v-5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6M12 7.5h.01"/></symbol>
     <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
     <symbol id="plane-flat" viewBox="14 10 50 34">
       <g stroke="#378ADD" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -378,6 +395,9 @@ a, button { cursor: pointer; }
     </div>
     <p class="xs muted" style="margin-top:12px">서버가 쉬고 있으면 첫 접속에 50초 정도 걸릴 수 있습니다.</p>
   </div>
+  <div class="memo" style="left:860px; top:600px">5년 · 261주 검색 데이터를<br><b>알고 답하는</b> 비서</div>
+  <div>
+  </div>
 </section>
 
 <!-- 2. 과제 개요 -->
@@ -385,6 +405,7 @@ a, button { cursor: pointer; }
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp1" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp1"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.0s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-target"/></svg></div>
     <div><div class="no">과제 소개</div><h2>과제 한눈에 보기</h2></div></div>
+  <div class="memo" style="left:500px; top:44px">한 줄로 말하면?<br><b>내 데이터를 아는 AI 비서</b> 만들기!</div>
   <div class="key"><svg class="ic"><use href="#i-bulb"/></svg>
     <p>일반 ChatGPT는 <b>내 데이터를 모릅니다.</b><br>
     <mark>내 데이터를 이해하고 맞춤형으로 답하는 AI 웹 서비스</mark>를 만드는 과제입니다.</p></div>
@@ -418,6 +439,7 @@ a, button { cursor: pointer; }
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp2" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp2"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-list"/></svg></div>
     <div><div class="no">과제 소개</div><h2>요구사항과 제출 항목</h2></div></div>
+  <div class="memo" style="left:540px; top:44px">API 10개 = 데이터 5 + 대화 4 + 채팅 1<br>스크린샷 3장은 <b>README</b>에 넣기</div>
   <div class="row fill" style="grid-template-columns: 1.25fr 1fr">
     <div class="card">
       <h3><svg class="ic"><use href="#i-layers"/></svg>필수 요구사항 <span class="muted sm" style="font-family:Pretendard,sans-serif">6개 분야 · 세부</span><i class="cnt">25</i></h3>
@@ -455,6 +477,7 @@ a, button { cursor: pointer; }
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp3" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="4.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp3"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="4.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-spark"/></svg></div>
     <div><div class="no">01 · 문제 정의</div><h2>같은 질문, 다른 답</h2></div></div>
+  <div class="memo" style="left:520px; top:44px">질문은 같은데 떠날까만 숫자로 답해요<br>→ 질문할 때 <b>요약을 같이 보내서!</b></div>
   <div class="key"><svg class="ic"><use href="#i-bulb"/></svg>
     <p>떠날까는 질문할 때마다 <b>최신 데이터 요약</b>을 함께 보냅니다.<br>그래서 <mark>"내 데이터"를 근거로</mark> 답합니다.</p></div>
   <div class="row c2 fill">
@@ -488,6 +511,7 @@ a, button { cursor: pointer; }
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp4" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp4"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.0s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-chart"/></svg></div>
     <div><div class="no">02 · 데이터</div><h2>5년 치 "해외여행" 검색 관심도</h2></div></div>
+  <div class="memo" style="left:640px; top:36px"><b>100점</b> = 5년 중 가장 많이 검색된 주<br>(2026년 10월 3주)<br>나머지는 그 주와 비교한 점수!</div>
   <div class="row fill" style="grid-template-columns: 1.3fr 1fr">
     <div class="card" style="display:flex; flex-direction:column">
       <h3><svg class="ic"><use href="#i-chart"/></svg>주간 관심도 지수 (261주)</h3>
@@ -522,6 +546,7 @@ a, button { cursor: pointer; }
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp5" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp5"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-layers"/></svg></div>
     <div><div class="no">03 · 전체 구조</div><h2>화면 · 서버 · DB · AI의 연결</h2></div></div>
+  <div class="memo" style="left:620px; top:24px; font-size:23px">사용자가 버셀(Vercel) 화면에 들어오면<br>→ 화면이 렌더(Render) 서버에 묻고<br>→ 서버가 DB·AI에 다녀와서 답해요</div>
   <div class="key"><svg class="ic"><use href="#i-bulb"/></svg>
     <p>화면은 <b>Vercel</b>, 서버는 <b>Render</b>에 따로 배포했습니다.<br>DB와 AI에는 서버만 접근하고, <mark>키는 서버 환경 변수에만</mark> 있습니다.</p></div>
   <div class="flow" style="height:240px">
@@ -552,6 +577,7 @@ a, button { cursor: pointer; }
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp6" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="4.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp6"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="4.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-spark"/></svg></div>
     <div><div class="no">04 · 핵심 원리</div><h2>컨텍스트 주입: 요약을 프롬프트에 넣기</h2></div></div>
+  <div class="memo" style="right:90px; bottom:62px">GPT는 이 데이터를 배운 적이 없어요<br>→ 답 속 숫자는 <b>전부 요약에서</b> 와요!</div>
   <div class="steps">
     <div class="step"><div class="si"><div class="n">1</div><svg class="ic"><use href="#i-chat"/></svg></div><b>질문 받기</b><span><code>POST /api/chat</code><br>질문과 대화 ID</span></div>
     <div class="step"><div class="si"><div class="n">2</div><svg class="ic"><use href="#i-chart"/></svg></div><b>요약 가져오기</b><span>요약 API와 같은 함수<br><code>get_summary()</code></span></div>
@@ -593,6 +619,7 @@ AI 비서 '떠날까'다.
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp7" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp7"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.0s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-server"/></svg></div>
     <div><div class="no">05 · 백엔드 설계</div><h2>역할별로 나눈 구조와 입력 검증</h2></div></div>
+  <div class="memo" style="left:650px; top:44px"><b>422</b> = 입력이 규칙에 안 맞을 때<br>서버가 돌려주는 오류 번호</div>
   <div class="row fill c3">
     <div class="card">
       <h3><svg class="ic"><use href="#i-folder"/></svg>파일을 나눈 기준</h3>
@@ -630,6 +657,7 @@ AI 비서 '떠날까'다.
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp8" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp8"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-monitor"/></svg></div>
     <div><div class="no">06 · 기능 시연</div><h2>배포된 화면 둘러보기</h2></div></div>
+  <div class="memo" style="left:520px; top:52px">전부 <b>실제 배포 화면</b>을 찍은 사진이에요</div>
   <div class="gallery fill">
     <div class="gtabs" id="demoTabs">
       <span class="clickhint"><svg class="hand"><use href="#i-hand"/></svg>눌러서 화면 바꾸기</span>
@@ -651,6 +679,7 @@ AI 비서 '떠날까'다.
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp9" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="4.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp9"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="4.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-shield"/></svg></div>
     <div><div class="no">07 · 배포와 보안</div><h2>안전하게 배포하기</h2></div></div>
+  <div class="memo" style="left:470px; top:44px"><b>CORS</b> = 아무 사이트나 내 서버를<br>부르지 못하게 막는 문지기</div>
   <div class="row fill" style="grid-template-columns: 1.15fr 1fr">
     <div class="row c2" style="grid-auto-rows: 1fr">
       <div class="card"><h3><svg class="ic"><use href="#i-globe"/></svg>CORS</h3>
@@ -680,6 +709,7 @@ AI 비서 '떠날까'다.
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp10" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp10"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.0s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-bolt"/></svg></div>
     <div><div class="no">08 · 문제 해결</div><h2>막혔던 곳과 해결 방법</h2></div></div>
+  <div class="memo" style="left:520px; top:44px">제일 오래 붙잡고 있던 건<br><b>"AI 답변이 빈칸"</b> 문제!</div>
   <div class="trouble fill">
     <div class="tc"><div class="tt"><svg class="ic"><use href="#i-alert"/></svg>새 API가 안 보임</div><dl>
       <dt class="p">증상</dt><dd>Swagger에 데이터 API가 없음</dd>
@@ -714,6 +744,7 @@ AI 비서 '떠날까'다.
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp11" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp11"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.5s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-target"/></svg></div>
     <div><div class="no">09 · 한계와 다음 단계</div><h2>"3월은 어땠어?"에는 아직 못 답해요</h2></div></div>
+  <div class="memo" style="left:760px; top:44px">모른다고 말하는 것도<br><b>지어내지 않는</b> 기능이에요</div>
   <div class="row c2 fill">
     <div style="display:flex; flex-direction:column; gap:12px">
       <img class="shot" src="presentation-assets/march.jpg" alt="3월 질문과 답변">
@@ -767,6 +798,7 @@ AI 비서 '떠날까'다.
     <div class="ck bonus"><svg class="ic n"><use href="#i-minus"/></svg><div><b>보너스: Function Calling · MCP</b><span>다음 단계로 남김</span></div><span class="tag no">미구현</span></div>
   </div>
   <p class="xs muted" style="margin-top:10px">항목별 구현 파일과 증빙 사진: <code>docs/requirements-check.md</code></p>
+  <div class="memo" style="right:120px; bottom:30px">필수는 <b>모두 통과!</b></div>
 </section>
 
 <!-- 14. 용어 사전 -->
@@ -774,6 +806,7 @@ AI 비서 '떠날까'다.
   <svg class="deco" viewBox="0 0 210 64" aria-hidden="true"><path id="dp13" d="M4 56 C 60 10, 130 6, 196 26" fill="none" stroke="#85b7eb" stroke-width="2.5" stroke-dasharray="1.5 8" stroke-linecap="round"/><g><use href="#plane-flat" x="-17" y="-12" width="34" height="24"/><animateMotion dur="5.0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"><mpath href="#dp13"/></animateMotion><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.72;0.8;1" dur="5.0s" repeatCount="indefinite"/></g></svg>
   <div class="head"><div class="badge"><svg class="ic"><use href="#i-book"/></svg></div>
     <div><div class="no">11 · 용어 사전 · 98개</div><h2>단계별로 배운 용어</h2></div></div>
+  <div class="memo" style="left:560px; top:44px">다른 장에서도 <b>파란 ⓘ 표시</b>를 누르면<br>바로 뜻을 볼 수 있어요</div>
   <p class="sm muted" style="margin:-6px 0 12px; display:flex; align-items:center; gap:10px"><span class="clickhint"><svg class="hand"><use href="#i-hand"/></svg>왼쪽 단계를 누르세요</span>표기: <b>용어</b> · 영문, 읽는 법 · 쉬운 설명</p>
   <div class="gl fill">
     <div class="gtab2" id="glTabs"></div>
@@ -816,6 +849,7 @@ AI 비서 '떠날까'다.
 <div id="notes"><div class="nh"><span id="notesTitle"></span><span>N 키로 닫기</span></div><ol id="notesBody"></ol></div>
 <div id="nav"><button id="prev" aria-label="이전 장"><svg class="ic"><use href="#i-left"/></svg></button><span id="count"></span><button id="next" aria-label="다음 장"><svg class="ic"><use href="#i-right"/></svg></button></div>
 <div id="toast">복사했어요</div>
+<div id="pop"><span class="pc">닫기 ✕</span><div class="pn" id="popN"></div><span class="ps" id="popS"></span><div id="popD"></div></div>
 
 <script>
 (function () {
@@ -834,6 +868,7 @@ AI 비서 '떠날까'다.
     document.getElementById("progress").style.width = ((cur + 1) / slides.length * 100) + "%";
     history.replaceState(null, "", "#" + (cur + 1));
     if (typeof renderNotes === "function" && notesBox.classList.contains("on")) renderNotes();
+    const pp = document.getElementById("pop"); if (pp) pp.classList.remove("on");
   }
   document.getElementById("prev").onclick = () => show(cur - 1);
   document.getElementById("next").onclick = () => show(cur + 1);
@@ -843,6 +878,7 @@ AI 비서 '떠날까'다.
     else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); show(cur - 1); }
     else if (e.key === "Home") show(0);
     else if (e.key === "End") show(slides.length - 1);
+    else if (e.key === "Escape") { document.getElementById("pop").classList.remove("on"); }
     else if (e.key === "n" || e.key === "N" || e.key === "ㅜ") { notesBox.classList.toggle("on"); renderNotes(); }
     else if (e.key === "f" || e.key === "F") {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
@@ -851,6 +887,74 @@ AI 비서 '떠날까'다.
   });
   window.addEventListener("resize", fit);
 
+
+
+  // 용어 바로 보기: 장마다 처음 나오는 용어에 읽는 법과 ⓘ 표시를 붙이고, 누르면 뜻을 보여 준다
+  const TERMS = {"가상환경": {"sub": "Virtual Environment, 버추얼 인바이런먼트", "desc": "프로젝트마다 따로 쓰는 파이썬 설치 공간. 다른 프로젝트와 패키지 버전이 섞이지 않는다.", "kor": "버추얼 인바이런먼트"}, "pip": {"sub": "핍", "desc": "파이썬 패키지를 설치하는 도구.", "kor": "핍"}, "requirements.txt": {"sub": "리콰이어먼츠", "desc": "프로젝트에 필요한 패키지 목록 파일. 이 파일로 같은 환경을 다시 만든다.", "kor": "리콰이어먼츠"}, ".gitignore": {"sub": "깃 이그노어", "desc": "Git이 추적하지 않을 파일 목록. 키 파일과 .env를 여기에 넣어 올라가지 않게 한다.", "kor": "깃 이그노어"}, "clone": {"sub": "클론", "desc": "원격 저장소를 내 컴퓨터로 통째로 복사하는 것.", "kor": "클론"}, "시계열": {"sub": "Time Series, 타임 시리즈", "desc": "시간 순서대로 기록된 데이터. 이 프로젝트의 주간 검색 관심도가 해당한다.", "kor": "타임 시리즈"}, "시드": {"sub": "Seed, 시드", "desc": "처음에 채워 넣는 초기 데이터. seed.csv 261건.", "kor": "시드"}, "요약 정보": {"sub": "Summary, 서머리", "desc": "데이터 전체를 대표하는 숫자(개수, 기간, 평균, 최대 등)를 짧게 뽑은 것.", "kor": "서머리"}, "추세": {"sub": "Trend, 트렌드", "desc": "시간이 지나면서 값이 오르는지 내리는지 나타내는 방향. 예: 상승 +70.2%.", "kor": "트렌드"}, "FastAPI": {"sub": "패스트에이피아이", "desc": "파이썬으로 API 서버를 만드는 프레임워크.", "kor": "패스트에이피아이"}, "uvicorn": {"sub": "유비콘", "desc": "FastAPI 앱을 실제로 실행하는 서버 프로그램.", "kor": "유비콘"}, "엔드포인트": {"sub": "Endpoint, 엔드포인트", "desc": "API의 개별 주소. 예: /api/data.", "kor": "엔드포인트"}, "라우터": {"sub": "Router, 라우터", "desc": "엔드포인트를 주제별로 묶어 관리하는 단위.", "kor": "라우터"}, "미들웨어": {"sub": "Middleware, 미들웨어", "desc": "요청과 응답 사이에서 공통 처리를 하는 중간 계층.", "kor": "미들웨어"}, "CORS": {"sub": "코스, Cross-Origin Resource Sharing", "desc": "다른 주소의 웹페이지가 내 API를 호출해도 되는지 정하는 브라우저 보안 규칙.", "kor": "코스"}, "Swagger UI": {"sub": "스웨거 유아이", "desc": "API를 목록으로 보여주고 브라우저에서 바로 시험해 볼 수 있는 자동 문서 화면.", "kor": "스웨거 유아이"}, "Firebase": {"sub": "파이어베이스", "desc": "구글의 백엔드 서비스 모음.", "kor": "파이어베이스"}, "Firestore": {"sub": "파이어스토어", "desc": "Firebase의 문서형 데이터베이스.", "kor": "파이어스토어"}, "컬렉션": {"sub": "Collection, 컬렉션", "desc": "Firestore에서 문서들을 담는 폴더 같은 단위. 이 프로젝트의 data 컬렉션.", "kor": "컬렉션"}, "문서": {"sub": "Document, 도큐먼트", "desc": "컬렉션 안의 데이터 한 건. 필드와 값으로 이루어진다.", "kor": "도큐먼트"}, "서비스 계정": {"sub": "Service Account, 서비스 어카운트", "desc": "사람이 아닌 서버 프로그램이 Firebase에 접속할 때 쓰는 전용 계정.", "kor": "서비스 어카운트"}, "비공개 키": {"sub": "Private Key, 프라이빗 키", "desc": "서비스 계정의 신분증 역할을 하는 파일. 유출되면 누구나 DB에 접근할 수 있어 절대 공개하지 않는다.", "kor": "프라이빗 키"}, "프로덕션 모드": {"sub": "Production Mode, 프로덕션 모드", "desc": "Firestore의 보안 규칙이 엄격한 상태. 서버(Admin SDK)만 접근하게 한다.", "kor": "프로덕션 모드"}, "Admin SDK": {"sub": "어드민 에스디케이", "desc": "서버가 Firebase를 관리자 권한으로 다루는 개발 도구 모음.", "kor": "어드민 에스디케이"}, "초기화": {"sub": "Initialization, 이니셜라이제이션", "desc": "프로그램이 Firebase를 쓰기 전에 키로 연결을 준비하는 과정.", "kor": "이니셜라이제이션"}, "클라이언트": {"sub": "Client, 클라이언트", "desc": "서비스에 요청을 보내는 쪽. 여기서는 코드 안의 Firestore 연결 객체.", "kor": "클라이언트"}, "스모크 테스트": {"sub": "Smoke Test, 스모크 테스트", "desc": "핵심 기능이 최소한 작동하는지 빠르게 확인하는 시험. check_firestore.py.", "kor": "스모크 테스트"}, "CRUD": {"sub": "크루드", "desc": "만들기(Create), 읽기(Read), 수정(Update), 삭제(Delete). 데이터 관리의 네 가지 기본 동작.", "kor": "크루드"}, "Pydantic": {"sub": "파이댄틱", "desc": "입력 데이터의 형태를 검사하고 변환하는 파이썬 라이브러리. FastAPI가 내부에서 사용한다.", "kor": "파이댄틱"}, "스키마": {"sub": "Schema, 스키마", "desc": "데이터가 어떤 필드와 형식을 가져야 하는지 정한 설계도. schemas.py.", "kor": "스키마"}, "검증": {"sub": "Validation, 밸리데이션", "desc": "들어온 값이 규칙에 맞는지 확인하는 것. 날짜 \"abc\"를 422로 거절하는 것이 예.", "kor": "밸리데이션"}, "HTTP 메서드": {"sub": "HTTP Method, 메서드", "desc": "요청의 의도를 나타내는 동사. POST(생성), GET(조회), PUT(수정), DELETE(삭제).", "kor": "메서드"}, "상태 코드": {"sub": "Status Code, 스테이터스 코드", "desc": "요청 결과를 숫자로 알려주는 응답. 200 성공, 201 생성됨, 404 없음, 422 입력 오류.", "kor": "스테이터스 코드"}, "서비스 계층": {"sub": "Service Layer, 서비스 레이어", "desc": "API 주소 처리(라우터)와 DB 작업 로직을 나누는 중간 계층. data_service.py.", "kor": "서비스 레이어"}, "환경 변수 파일 경로": {"sub": "Env File Path", "desc": ".env를 어느 위치에서 읽을지 코드에 직접 지정하는 것. 실행 위치가 달라져도 같은 파일을 읽는다.", "kor": ""}, "적재": {"sub": "Load, 로드", "desc": "파일의 데이터를 데이터베이스에 넣는 작업. seed.csv 261건을 Firestore에 넣었다.", "kor": "로드"}, "배치": {"sub": "Batch, 배치", "desc": "여러 쓰기를 묶어 한 번에 처리하는 방식. 한 번에 최대 500건이라 400건씩 나눠 보냈다.", "kor": "배치"}, "중복 방지": {"sub": "Deduplication, 디듀플리케이션", "desc": "같은 데이터가 두 번 들어가지 않게 막는 것. 컬렉션에 데이터가 있으면 멈추고 묻는다.", "kor": "디듀플리케이션"}, "dry-run": {"sub": "드라이 런", "desc": "실제로 쓰지 않고 검사만 해 보는 예행 실행 옵션.", "kor": "드라이 런"}, "BOM": {"sub": "Byte Order Mark, 비오엠", "desc": "파일 맨 앞에 붙는 보이지 않는 표식. 그대로 읽으면 첫 열 이름이 깨져 utf-8-sig로 제거한다.", "kor": "비오엠"}, "대화 기록": {"sub": "Conversation History, 컨버세이션 히스토리", "desc": "사용자와 AI가 주고받은 메시지의 저장본.", "kor": "컨버세이션 히스토리"}, "메시지 역할": {"sub": "Role, 롤", "desc": "메시지를 쓴 쪽을 구분하는 값. user는 사용자, assistant는 AI.", "kor": "롤"}, "ISO 8601": {"sub": "아이에스오 에이티식스티원", "desc": "날짜와 시각을 \"2026-11-17T17:26:20+00:00\"처럼 쓰는 국제 표준 표기.", "kor": "아이에스오 에이티식스티원"}, "UTC": {"sub": "유티씨, 협정 세계시", "desc": "시간대 차이가 없는 기준 시각. 한국은 UTC+9다.", "kor": "유티씨"}, "목록 조회와 상세 조회": {"sub": "List and Detail", "desc": "여러 건을 요약으로 보는 요청과, 한 건을 전체로 보는 요청.", "kor": ""}, "시스템 프롬프트": {"sub": "System Prompt, 시스템 프롬프트", "desc": "AI에게 역할과 참고 정보를 미리 알려 주는 숨은 지시문. 여기에 데이터 요약을 넣는다.", "kor": "시스템 프롬프트"}, "토큰": {"sub": "Token, 토큰", "desc": "AI가 글자를 세는 단위. 한국어는 대략 한 글자가 1~2토큰이다.", "kor": "토큰"}, "max_tokens": {"sub": "맥스 토큰즈", "desc": "답변 길이 상한. 비용과 응답 시간을 제한한다.", "kor": "맥스 토큰즈"}, "OpenAI GPT": {"sub": "오픈에이아이 지피티", "desc": "질문에 문장으로 답하는 대화형 AI 모델.", "kor": "오픈에이아이 지피티"}, "API 키": {"sub": "API Key, 에이피아이 키", "desc": "OpenAI 사용 권한을 증명하는 비밀 문자열. 사용량만큼 과금된다.", "kor": "에이피아이 키"}, "호출 한도·속도 제한": {"sub": "Rate Limit, 레이트 리밋", "desc": "짧은 시간에 보낼 수 있는 요청 수와 사용 한도.", "kor": "레이트 리밋"}, "타임아웃": {"sub": "Timeout, 타임아웃", "desc": "응답이 오지 않을 때 기다리는 최대 시간.", "kor": "타임아웃"}, "가짜 객체": {"sub": "Mock, 목", "desc": "외부 서비스 대신 흉내 내는 시험용 객체.", "kor": "목"}, "finish_reason": {"sub": "피니시 리즌", "desc": "AI가 왜 답변을 멈췄는지 알려 주는 값. stop은 정상 종료, length는 토큰 한도에 걸려 잘림.", "kor": "피니시 리즌"}, "추론 토큰": {"sub": "Reasoning Token, 리즈닝 토큰", "desc": "추론형 모델이 답을 만들기 전에 속으로 쓰는 토큰. 화면에 안 보이지만 한도와 비용에 포함된다.", "kor": "리즈닝 토큰"}, "추론형 모델": {"sub": "Reasoning Model, 리즈닝 모델", "desc": "답하기 전에 먼저 생각하는 단계를 거치는 AI 모델.", "kor": "리즈닝 모델"}, "베이스 URL": {"sub": "Base URL, 베이스 유알엘", "desc": "API 요청을 보내는 기본 주소. 바꾸면 다른 서버로 요청이 간다.", "kor": "베이스 유알엘"}, "배포": {"sub": "Deploy, 디플로이", "desc": "내 PC에서만 돌던 프로그램을 인터넷의 서버에 올려 누구나 접속하게 하는 것.", "kor": "디플로이"}, "Render": {"sub": "렌더", "desc": "코드를 올리면 서버로 실행해 주는 클라우드 호스팅 서비스. 이 프로젝트의 API 주소는 https://my-ai-assistant-pjlv.onrender.com 이다.", "kor": "렌더"}, "버전 고정": {"sub": "Pinning, 피닝", "desc": "패키지 버전을 ==로 못 박아 어디서 설치해도 같은 결과가 나오게 하는 것.", "kor": "피닝"}, "루트 디렉터리": {"sub": "Root Directory, 루트 디렉터리", "desc": "Render가 빌드와 실행의 기준으로 삼는 폴더. 여기서는 backend.", "kor": "루트 디렉터리"}, "빌드 명령·시작 명령": {"sub": "Build Command, Start Command", "desc": "설치 단계에서 실행할 명령과 서버를 켤 때 실행할 명령.", "kor": ""}, "0.0.0.0": {"sub": "제로 제로 제로 제로", "desc": "이 서버로 들어오는 모든 네트워크 요청을 받겠다는 주소. 외부 접속에 필요하다.", "kor": "제로 제로 제로 제로"}, "$PORT": {"sub": "포트 환경 변수", "desc": "Render가 정해서 알려 주는 포트 번호. 코드에 숫자를 직접 쓰지 않는다.", "kor": "포트 환경 변수"}, "콜드 스타트": {"sub": "Cold Start, 콜드 스타트", "desc": "한동안 잠들어 있던 서버가 첫 요청에 깨어나느라 응답이 느린 현상.", "kor": "콜드 스타트"}, "헬스 체크": {"sub": "Health Check, 헬스 체크", "desc": "서버가 살아 있는지 주기적으로 확인하는 주소. /api/health.", "kor": "헬스 체크"}, "프론트엔드": {"sub": "Frontend, 프런트엔드", "desc": "사용자가 눈으로 보고 누르는 화면 쪽 프로그램. HTML, CSS, JS로 만든다.", "kor": "프런트엔드"}, "HTML/CSS/JavaScript": {"sub": "에이치티엠엘, 씨에스에스, 자바스크립트", "desc": "화면의 구조, 모양, 동작을 각각 맡는 웹의 기본 언어.", "kor": "에이치티엠엘"}, "fetch": {"sub": "페치", "desc": "브라우저에서 서버 API를 호출하는 자바스크립트 기능.", "kor": "페치"}, "DOM": {"sub": "돔, Document Object Model", "desc": "브라우저가 화면을 코드로 다루기 위해 만드는 요소의 나무 구조.", "kor": "돔"}, "XSS": {"sub": "엑스에스에스, Cross-Site Scripting", "desc": "입력에 악성 스크립트를 심어 화면에서 실행시키는 공격. textContent로 넣어 막는다.", "kor": "엑스에스에스"}, "헤드리스 브라우저": {"sub": "Headless Browser, 헤드리스 브라우저", "desc": "화면 창 없이 명령으로 실행해 페이지를 시험하는 브라우저.", "kor": "헤드리스 브라우저"}, "로딩 표시": {"sub": "Loading Indicator, 로딩 인디케이터", "desc": "처리 중임을 알리는 화면 표시.", "kor": "로딩 인디케이터"}, "페이지네이션": {"sub": "Pagination, 페이지네이션", "desc": "긴 목록을 페이지로 나눠 보여 주는 방식.", "kor": "페이지네이션"}, "파비콘": {"sub": "Favicon, 파비콘", "desc": "브라우저 탭 제목 옆에 보이는 작은 아이콘. 여기서는 로고를 쓴다.", "kor": "파비콘"}, "SVG": {"sub": "Scalable Vector Graphics, 에스브이지", "desc": "확대해도 깨지지 않는 점·선·도형 기반 그림 형식. 로고, 구름, 비행기를 모두 SVG로 그렸다.", "kor": "에스브이지"}, "웹 폰트": {"sub": "Web Font, 웹 폰트", "desc": "사용자의 PC에 없어도 인터넷에서 내려받아 쓰는 글꼴. 제목과 탭에 Google Fonts의 Jua를 썼다.", "kor": "웹 폰트"}, "상대 지수": {"sub": "Relative Index, 릴러티브 인덱스", "desc": "실제 개수가 아니라 기준 값과 비교해 0~100으로 나타낸 수. 검색이 가장 많았던 주를 100으로 둔다.", "kor": "릴러티브 인덱스"}, "관심도 지수": {"sub": "Interest Index, 인터레스트 인덱스", "desc": "Google Trends가 검색 관심도를 0~100으로 나타낸 값. 검색 횟수가 아니다.", "kor": "인터레스트 인덱스"}, "Google Trends": {"sub": "구글 트렌드", "desc": "검색어가 시간에 따라 얼마나 검색됐는지 상대적으로 보여 주는 구글 서비스. 이 프로젝트의 데이터 출처.", "kor": "구글 트렌드"}, "CSS 애니메이션": {"sub": "CSS Animation, 씨에스에스 애니메이션", "desc": "자바스크립트 없이 CSS만으로 움직임을 주는 기능. 로딩 비행기에 썼다.", "kor": "씨에스에스 애니메이션"}, "변경 기록": {"sub": "Changelog, 체인지로그", "desc": "무엇을 왜 어떻게 바꿨는지 날짜순으로 남기는 문서. docs/changelog.md.", "kor": "체인지로그"}, "애플리케이션 제어 정책": {"sub": "Application Control Policy, 애플리케이션 컨트롤 폴리시", "desc": "신뢰하지 않는 프로그램 파일의 실행을 Windows가 막는 보안 기능.", "kor": "애플리케이션 컨트롤 폴리시"}, "네이티브 확장 모듈": {"sub": "Native Extension, 네이티브 익스텐션", "desc": "파이썬 대신 C 등으로 만들어 속도를 높인 파일(.pyd, DLL). 서명이 없으면 보안 정책에 차단될 수 있다.", "kor": "네이티브 익스텐션"}, "Vercel": {"sub": "버셀", "desc": "HTML·CSS·JS 같은 웹 화면을 인터넷에 올려 주는 배포 서비스. 프론트엔드를 tteonalkka.vercel.app에 올렸다.", "kor": "버셀"}, "정적 사이트": {"sub": "Static Site, 스태틱 사이트", "desc": "서버에서 계산하지 않고 미리 만든 파일을 그대로 보내는 웹사이트. 이 프로젝트의 frontend 폴더가 해당한다.", "kor": "스태틱 사이트"}, "오리진": {"sub": "Origin, 오리진", "desc": "웹 주소에서 프로토콜·도메인·포트를 합친 부분. CORS 허용 목록(ALLOWED_ORIGINS)에 적는 단위다.", "kor": "오리진"}, "README": {"sub": "리드미", "desc": "저장소 첫 화면에 보이는 설명 문서. 소개, 실행 방법, 배포 주소 등을 적는다.", "kor": "리드미"}, "마크다운": {"sub": "Markdown, 마크다운", "desc": "#, -, | 같은 기호로 제목·목록·표를 쓰는 간단한 문서 형식. README.md가 이 형식이다.", "kor": "마크다운"}, "내보내기": {"sub": "Export, 익스포트", "desc": "화면 속 데이터를 파일로 저장하는 기능. 데이터 관리 탭에 CSV·JSON 내려받기 버튼을 넣었다.", "kor": "익스포트"}, "CSV": {"sub": "Comma-Separated Values, 씨에스브이", "desc": "쉼표로 칸을 나눈 표 형식 텍스트 파일. 엑셀에서 바로 열린다.", "kor": "씨에스브이"}, "JSON": {"sub": "JavaScript Object Notation, 제이슨", "desc": "이름과 값을 중괄호·대괄호로 묶어 적는 데이터 형식. API가 주고받는 형식과 같다.", "kor": "제이슨"}, "Blob": {"sub": "Binary Large Object, 블롭", "desc": "브라우저에서 파일 내용을 담아 두는 덩어리. 서버 없이 화면에서 바로 파일을 만들어 내려받을 때 쓴다.", "kor": "블롭"}, "빌드": {"sub": "Build, 빌드", "desc": "배포 전에 파일을 복사·생성해 내보낼 결과물을 만드는 과정. Vercel이 배포 때마다 build.sh를 실행한다.", "kor": "빌드"}, "빌드 시점 주입": {"sub": "Build-time Injection, 빌드 타임 인젝션", "desc": "실행 중이 아니라 빌드할 때 환경 변수 값을 파일에 써 넣는 방식. 정적 사이트는 브라우저가 환경 변수를 직접 읽지 못해서 이 방식을 쓴다.", "kor": "빌드 타임 인젝션"}, "vercel.json": {"sub": "버셀 제이슨", "desc": "Vercel 배포 설정 파일. 빌드 명령과 배포 폴더를 적는다.", "kor": "버셀 제이슨"}, "요구사항 추적표": {"sub": "Requirements Traceability Matrix, 리콰이어먼츠 트레이서빌리티 매트릭스", "desc": "요구사항마다 구현 위치와 증빙을 짝지어 빠진 것을 찾는 표. docs/requirements-check.md.", "kor": "리콰이어먼츠 트레이서빌리티 매트릭스"}, "컨텍스트 주입": {"sub": "Context Injection, 컨텍스트 인젝션", "desc": "AI가 모르는 정보(여기서는 데이터 요약)를 질문과 함께 프롬프트에 넣어 주는 방법. 떠날까는 질문할 때마다 최신 요약을 시스템 프롬프트에 넣는다.", "kor": "컨텍스트 인젝션"}, "환경 변수": {"sub": "Environment Variable, 인바이런먼트 배리어블", "desc": "코드 밖에 따로 두는 설정 값. API 키처럼 공개하면 안 되는 값이나 서버 주소를 코드에 적지 않고 여기에 둔다.", "kor": "인바이런먼트 배리어블"}, "API": {"sub": "Application Programming Interface, 에이피아이", "desc": "프로그램끼리 주고받는 약속된 주소와 형식. 화면은 /api/chat 같은 API 주소로 서버에 요청한다.", "kor": "에이피아이"}, "백엔드": {"sub": "Backend, 백엔드", "desc": "사용자에게 보이지 않는 서버 쪽 프로그램. 데이터 저장, AI 호출, 요약 계산을 맡는다. 이 프로젝트는 FastAPI로 만들어 Render에 배포했다.", "kor": "백엔드"}, "GitHub": {"sub": "깃허브", "desc": "코드를 올려 두고 변경 기록을 관리하는 온라인 저장소 서비스. 과제는 GitHub 저장소 주소로 제출한다.", "kor": "깃허브"}, "Function Calling": {"sub": "펑션 콜링", "desc": "AI가 답하기 전에 미리 정해 둔 함수(도구)를 직접 불러 필요한 데이터를 가져오게 하는 기능. 다음 단계로 남긴 보너스 과제.", "kor": "펑션 콜링"}, "MCP": {"sub": "Model Context Protocol, 엠씨피", "desc": "AI가 외부 도구와 데이터에 연결하는 표준 방식. 보너스 과제에서 Function Calling과 함께 쓸 수 있는 연동 방법.", "kor": "엠씨피"}, "HTTPS": {"sub": "에이치티티피에스", "desc": "주고받는 내용을 암호화하는 웹 통신 방식. 주소가 https://로 시작한다.", "kor": "에이치티티피에스"}};
+  const TERM_RULES = [
+    ["Google Trends", "Google Trends"], ["OpenAI GPT", "OpenAI GPT"], ["Swagger", "Swagger UI"], ["Vercel", "Vercel"],
+    ["Render", "Render"], ["FastAPI", "FastAPI"], ["Firestore", "Firestore"], ["Firebase", "Firebase"], ["CORS", "CORS"],
+    ["Pydantic", "Pydantic"], ["fetch", "fetch"], ["README", "README"], ["GitHub", "GitHub"], ["CRUD", "CRUD"],
+    ["Function Calling", "Function Calling"], ["MCP", "MCP"], ["HTTPS", "HTTPS"], ["CSV", "CSV"], ["JSON", "JSON"],
+    ["시스템 프롬프트", "시스템 프롬프트"], ["컨텍스트 주입", "컨텍스트 주입"], ["시계열", "시계열"], ["상대 지수", "상대 지수"],
+    ["관심도 지수", "관심도 지수"], ["콜드 스타트", "콜드 스타트"], ["환경 변수", "환경 변수"], ["정적 사이트", "정적 사이트"],
+    ["엔드포인트", "엔드포인트"], ["라우터", "라우터"], ["스키마", "스키마"], ["프론트엔드", "프론트엔드"], ["백엔드", "백엔드"],
+    ["토큰", "토큰"], ["추세", "추세"], ["로딩 표시", "로딩 표시"], ["내보내기", "내보내기"], ["API", "API"],
+  ];
+  const escapeRe = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const termRe = new RegExp(TERM_RULES.map(([w]) => /^[A-Za-z]/.test(w) ? "(?<![A-Za-z])" + escapeRe(w) + "(?![A-Za-z_])" : escapeRe(w)).join("|"));
+  const SKIP = "code, pre, svg, button, a, .bubble, .head, .arrow, .step, .tt, .flowline, .stat, .who, .memo, .clickhint, .tag, .glist, .gtab2, .src, .links, .mission, .tref, .cnt, #notes";
+  function linkTerms(slide) {
+    const used = new Set();
+    const walker = document.createTreeWalker(slide, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentElement && n.parentElement.closest(SKIP)) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
+      let rest = node;
+      for (;;) {
+        const text = rest.nodeValue;
+        const re = new RegExp(termRe.source, "g");
+        let m, hit = null;
+        while ((m = re.exec(text))) {
+          const rule = TERM_RULES.find(([w]) => w === m[0]);
+          if (rule && TERMS[rule[1]] && !used.has(rule[1])) { hit = { m, key: rule[1] }; break; }
+        }
+        if (!hit) break;
+        used.add(hit.key);
+        const after = rest.splitText(hit.m.index);
+        rest = after.splitText(hit.m[0].length);
+        const span = document.createElement("span");
+        span.className = "tref";
+        span.dataset.k = hit.key;
+        span.textContent = hit.m[0];
+        const t = TERMS[hit.key];
+        if (/[A-Za-z]/.test(hit.m[0]) && t.kor) {
+          const rd = document.createElement("small"); rd.className = "rd"; rd.textContent = t.kor; span.appendChild(rd);
+        }
+        span.insertAdjacentHTML("beforeend", '<svg class="qi"><use href="#i-info"/></svg>');
+        after.replaceWith(span);
+      }
+    });
+  }
+  slides.slice(1, slides.length - 2).forEach(linkTerms);
+  const pop = document.getElementById("pop");
+  document.addEventListener("click", (e) => {
+    const ref = e.target.closest(".tref");
+    if (!ref) { if (!e.target.closest("#pop")) pop.classList.remove("on"); else if (e.target.closest(".pc")) pop.classList.remove("on"); return; }
+    const t = TERMS[ref.dataset.k];
+    document.getElementById("popN").textContent = ref.dataset.k;
+    document.getElementById("popS").textContent = t.sub || "";
+    document.getElementById("popD").textContent = t.desc;
+    pop.classList.add("on");
+    const r = ref.getBoundingClientRect();
+    const w = pop.offsetWidth, h = pop.offsetHeight;
+    let x = Math.min(window.innerWidth - w - 12, Math.max(12, r.left));
+    let y = r.bottom + 8;
+    if (y + h > window.innerHeight - 12) y = r.top - h - 8;
+    pop.style.left = x + "px"; pop.style.top = y + "px";
+  });
 
   // 설명글 (N 키)
   const NOTES = [["표지", ["안녕하세요. 제가 만든 서비스는 <b>떠날까</b>입니다.", "과제명은 <b>AI Agent 개발: 나만의 AI 비서 구축</b>입니다.", "떠날까는 지난 5년 동안 사람들이 \"해외여행\"을 얼마나 검색했는지 알고, <b>그 숫자로 답하는 AI 비서</b>입니다.", "화면의 주소 세 개는 서비스, API 문서, GitHub 저장소입니다. 누르면 바로 열리고, 복사 버튼으로 주소를 복사할 수 있습니다.", "무료 서버라서 처음 접속하면 50초 정도 걸릴 수 있습니다."]], ["과제 한눈에 보기", ["먼저 과제를 간단히 소개하겠습니다.", "일반 ChatGPT에 \"이번 달 매출 어때?\"라고 물으면, 내 데이터를 모르니까 일반적인 답만 합니다.", "이 과제는 <b>내 데이터를 이해하고 거기에 맞춰 답하는 AI 서비스</b>를 만드는 것입니다.", "완성해야 하는 결과물은 네 가지입니다. <b>AI 채팅, 데이터 관리, 대화 기록, 배포와 문서화</b>입니다.", "작업은 아래 흐름 순서로 했습니다. 데이터를 분석하고, DB에 저장하고, AI가 그 데이터로 대화하게 만든 뒤, 인터넷에 배포했습니다."]], ["요구사항과 제출 항목", ["요구사항은 여섯 분야, 세부 항목으로는 <b>25개</b>입니다.", "기술은 FastAPI, HTML·CSS·JS, Firestore, GPT 네 가지로 정해져 있고, 화면은 프레임워크 없이 만들어야 합니다.", "배포는 백엔드 Render, 프론트엔드 Vercel로 정해져 있습니다.", "데이터는 시계열 <b>100개 이상</b>, 그리고 기간·개수·통계·추세 요약이 필요합니다.", "API는 데이터 5개, 대화 4개, 채팅 1개로 <b>모두 10개</b>입니다.", "제출은 세 가지입니다. GitHub 저장소 연결, README 작성, 그리고 스크린샷 3장입니다."]], ["같은 질문, 다른 답", ["같은 질문을 두 챗봇에 했을 때 차이를 보여 드리겠습니다.", "왼쪽 일반 챗봇은 계절이나 환율 같은 일반론만 말합니다. 이 문장은 설명을 위해 만든 예시입니다.", "오른쪽 떠날까는 <b>\"2026년 11월 1주 관심도는 77점\"</b>처럼 저장된 데이터의 실제 숫자로 답합니다.", "차이를 만드는 방법은 하나입니다. 질문할 때마다 <b>최신 데이터 요약을 AI에게 함께 보내는 것</b>입니다.", "이 방법은 뒤에서 자세히 설명하겠습니다."]], ["데이터", ["데이터는 구글 트렌드에서 \"해외여행\" 검색 관심도를 가져왔습니다. 대한민국, 웹 검색, 주 단위 5년, <b>261주</b>입니다.", "여기 숫자는 검색 횟수가 아닙니다. 기간 중 가장 많이 검색된 주를 <b>100점</b>으로 두고 나머지를 비교한 상대 점수입니다.", "평균은 39.7점이고, 대부분 20점에서 50점 사이를 오갔습니다.", "2026년 10월에 갑자기 올라서 <b>10월 3주가 100점</b>, 가장 최근인 <b>11월 1주가 77점</b>입니다. 평균의 약 1.9배입니다.", "최근 8주 평균을 그 전 8주와 비교하면 <b>70.2% 올라서</b> 추세를 \"상승\"으로 판단했습니다."]], ["전체 구조", ["전체 구조입니다. 왼쪽에서 오른쪽으로 요청이 흐릅니다.", "사용자가 Vercel에 있는 화면에 들어오면, 화면은 fetch로 Render에 있는 FastAPI 서버를 부릅니다.", "서버는 Firestore에서 데이터를 읽고 쓰고, OpenAI GPT에 질문을 보냅니다.", "중요한 점은 <b>DB와 AI에는 서버만 접근한다</b>는 것입니다. 비밀 키는 Render 환경 변수에만 있고 화면 코드에는 없습니다.", "화면 쪽 환경 변수는 서버 주소 하나뿐이고, 배포할 때 설정 파일로 만들어집니다."]], ["컨텍스트 주입", ["이 과제의 핵심인 <b>컨텍스트 주입</b>입니다. 질문이 들어오면 다섯 단계로 처리합니다.", "질문을 받고, 데이터 요약을 가져오고, 요약과 답변 규칙으로 <b>시스템 프롬프트</b>를 만듭니다.", "그다음 GPT를 부르고, 질문과 답을 대화 기록에 <b>자동으로 저장</b>합니다.", "왼쪽 검은 상자가 GPT에게 실제로 보내는 지시문입니다. 노란 글씨처럼 \"점을 붙여라\", \"모르는 값은 지어내지 마라\" 같은 규칙도 넣었습니다.", "원본 261개를 다 보내지 않고 <b>요약만</b> 보내서 비용이 적고, 데이터를 고치면 다음 질문부터 바로 반영됩니다."]], ["백엔드 설계", ["백엔드는 역할별로 파일을 나눴습니다.", "routers는 <b>어떤 주소로 무엇을 받는지</b>, services는 <b>받아서 무엇을 하는지</b>를 맡습니다.", "입력 검증은 Pydantic으로 했습니다. 2월 30일 같은 없는 날짜나 100점이 넘는 값은 DB에 닿기 전에 <b>422 오류</b>로 막습니다.", "같은 규칙으로 Swagger 문서도 자동으로 만들어집니다.", "오른쪽은 Firestore에서 추가, 조회, 수정, 삭제가 어떻게 동작하는지 정리한 것입니다."]], ["기능 시연", ["실제 배포된 화면입니다. 왼쪽 버튼을 누르면 화면이 바뀝니다.", "<b>채팅</b>: 질문하면 요약을 근거로 답하고, 오른쪽에 요약 카드와 그래프가 보입니다.", "<b>로딩</b>: 답을 기다리는 동안 비행기가 오가는 표시가 나옵니다.", "<b>데이터 관리</b>: 추가, 수정, 삭제를 할 수 있습니다. <b>대화 기록</b>: 지난 대화를 골라 다시 불러오고 이어서 대화할 수 있습니다.", "보너스로 데이터를 CSV나 JSON 파일로 <b>내려받는 기능</b>도 넣었습니다."]], ["배포와 보안", ["배포하면서 지킨 네 가지입니다.", "<b>CORS</b>는 허락한 주소의 화면만 서버를 부를 수 있게 하는 규칙입니다. 우리 Vercel 주소와 내 PC 주소만 허용했습니다.", "<b>키</b>는 코드에 넣지 않았습니다. 내 PC에서는 .env 파일, 배포 서버에서는 Render 환경 변수에 넣었고, .env는 GitHub에 올라가지 않게 막았습니다.", "<b>콜드 스타트</b>: 무료 서버는 쉬다가 깨어날 때 50초쯤 걸려서, 화면을 열면 서버부터 깨우고 다시 시도 버튼을 보여 줍니다.", "<b>비용</b>은 답변 길이 제한과, 이전 대화를 10개만 보내는 방식으로 줄였습니다."]], ["문제 해결", ["진행하면서 막혔던 여섯 가지입니다. 증상, 원인, 해결 순서로 보시면 됩니다.", "가장 기억에 남는 것은 <b>AI 답변이 빈칸으로 온 문제</b>입니다. 생각하는 모델이 답을 쓰기 전에 글자 수 한도를 다 써 버렸고, 한도를 2000으로 늘려 해결했습니다.", "또 하나는 <b>숫자의 뜻을 알 수 없던 문제</b>입니다. 39.7이 횟수인지 퍼센트인지 몰라서 단위를 \"점\"으로 통일하고 출처를 적었습니다.", "마지막은 요구사항 점검표를 만들다가 <b>빠진 항목을 직접 찾아 고친 경험</b>입니다.", "모든 수정은 변경 기록 문서에 남겼습니다."]], ["한계와 다음 단계", ["아쉬운 점도 있습니다. \"3월은 어땠어?\"처럼 특정 기간을 물으면 아직 답하지 못합니다.", "AI에게 요약만 보내기 때문에 월별 값을 볼 수 없어서입니다.", "대신 <b>모르는 값을 지어내지 않고</b> 모른다고 솔직하게 답하도록 만들었습니다.", "다음에는 <b>Function Calling</b>으로 AI가 필요한 기간의 데이터를 직접 찾아보게 하고 싶습니다.", "월별 지표, 다크 모드, 오류 문구 한국어로 바꾸기도 다음 할 일입니다."]], ["요구사항 체크리스트", ["과제 요구사항을 모두 지켰는지 점검한 결과입니다.", "필수 점검 항목 <b>12개를 모두 충족</b>했습니다.", "보너스는 <b>그래프와 내보내기 두 가지</b>를 구현했고, 다크 모드와 Function Calling은 다음 단계로 남겼습니다.", "항목마다 어느 파일에서 구현했는지와 증빙은 저장소의 요구사항 대조표 문서에 정리했습니다."]], ["용어 사전", ["과제를 하면서 배운 용어를 단계별로 정리했습니다. 모두 <b>98개</b>입니다.", "왼쪽에서 단계를 누르면 그 단계의 용어가 나옵니다.", "예를 들어 <b>CORS</b>는 다른 주소의 화면이 내 서버를 불러도 되는지 정하는 규칙이고, <b>시스템 프롬프트</b>는 AI에게 미리 주는 숨은 지시문입니다.", "발표가 끝난 뒤에도 필요할 때 찾아보실 수 있습니다."]], ["출처", ["참고한 자료입니다.", "데이터는 구글 트렌드에서 2026년 11월 9일에 수집했습니다.", "기술 문서는 FastAPI, Pydantic, Firestore, OpenAI, Render, Vercel 공식 문서를 참고했습니다.", "코드, 변경 기록, 실행 증빙은 모두 GitHub 저장소에 있습니다.", "들어 주셔서 감사합니다."]]];
