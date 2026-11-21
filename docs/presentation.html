@@ -260,6 +260,12 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
 .pnote p { display: grid; grid-template-columns: 22px 1fr; gap: 4px; margin: 2px 0; }
 .pnote p i { font-style: normal; width: 20px; height: 20px; border-radius: 50%; background: #e8a83c; color: #fff; font-family: Pretendard, sans-serif; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
 .pnote b { font-weight: 400; color: #b4541a; }
+/* 대본 큐 메모: 작게, 빈 자리에 */
+.cue { position: absolute; z-index: 4; max-width: 250px; font-family: "Nanum Pen Script", "Jua", cursive; font-size: 19px; line-height: 1.05;
+  color: #8a4a12; background: rgba(255, 246, 214, .92); border: 1px dashed #e8c06a; border-radius: 10px; padding: 3px 8px 4px;
+  transform: rotate(-1deg); pointer-events: none; }
+.cue i { font-style: normal; font-family: Pretendard, sans-serif; font-size: 11px; font-weight: 800; color: #fff; background: #e8a83c; border-radius: 999px; padding: 1px 6px; margin-right: 5px; vertical-align: 2px; }
+body.nocue .cue { display: none; }
 /* 클릭 표시 */
 a, button { cursor: pointer; }
 .hand { width: 15px; height: 15px; color: var(--orange); flex: none; animation: tap 1.6s ease-in-out infinite; }
@@ -855,7 +861,7 @@ AI 비서 '떠날까'다.
 </div></div>
 
 <div id="progress"></div>
-<div id="help">← → 또는 Space: 이동 · F: 전체 화면 · <b>N: 설명글</b> · <b>M: 대본 메모</b></div>
+<div id="help">← → 또는 Space: 이동 · F: 전체 화면 · <b>N: 설명글</b> · <b>M: 대본 메모 숨기기/보이기</b></div>
 <div id="notes"><div class="nh"><span id="notesTitle"></span><span>N 키로 닫기</span></div><ol id="notesBody"></ol></div>
 <div id="nav"><button id="prev" aria-label="이전 장"><svg class="ic"><use href="#i-left"/></svg></button><span id="count"></span><button id="next" aria-label="다음 장"><svg class="ic"><use href="#i-right"/></svg></button></div>
 <div id="toast">복사했어요</div>
@@ -879,7 +885,7 @@ AI 비서 '떠날까'다.
     history.replaceState(null, "", "#" + (cur + 1));
     if (typeof renderNotes === "function" && notesBox.classList.contains("on")) renderNotes();
     const pp = document.getElementById("pop"); if (pp) pp.classList.remove("on");
-    if (typeof placeNotes === "function" && typeof practice !== "undefined" && practice) placeNotes();
+    requestAnimationFrame(() => placeCues(cur));
   }
   document.getElementById("prev").onclick = () => show(cur - 1);
   document.getElementById("next").onclick = () => show(cur + 1);
@@ -890,14 +896,15 @@ AI 비서 '떠날까'다.
     else if (e.key === "Home") show(0);
     else if (e.key === "End") show(slides.length - 1);
     else if (e.key === "Escape") { document.getElementById("pop").classList.remove("on"); }
-    else if (e.key === "m" || e.key === "M" || e.key === "ㅡ") { practice = !practice; placeNotes(); }
+    else if (e.key === "m" || e.key === "M" || e.key === "ㅡ") { document.body.classList.toggle("nocue"); }
     else if (e.key === "n" || e.key === "N" || e.key === "ㅜ") { notesBox.classList.toggle("on"); renderNotes(); }
     else if (e.key === "f" || e.key === "F") {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
       else document.exitFullscreen();
     }
   });
-  window.addEventListener("resize", () => { fit(); if (typeof practice !== "undefined" && practice) placeNotes(); });
+  window.addEventListener("resize", fit);
+  document.querySelectorAll("#demoTabs button").forEach((b) => b.addEventListener("click", () => setTimeout(resetCues, 300)));
 
 
 
@@ -978,47 +985,78 @@ AI 비서 '떠날까'다.
     notesBox.scrollTop = 0;
   }
 
-  // 대본 메모 (M 키): 대본 문장을 해당 내용 위에 번호 붙은 메모로 띄운다
-  const NOTE_ANCHORS = [[["h1", [0]], [".mission", [1]], [".desc", [2]], [".links", [3, 4]]], [[".key", [0, 1, 2]], [".row.c4", [3]], [".flowline", [4]]], [["dl.info dt:nth-of-type(1)", [0, 1]], ["dl.info dt:nth-of-type(3)", [2, 3]], ["dl.info dt:nth-of-type(4)", [4]], [".fill > div > .card", [5]]], [[".row.c2 > .card:first-child", [0, 1]], [".row.c2 > .card:last-child", [2]], [".key", [3, 4]]], [["dl.info", [0, 1]], [".chart", [2, 3]], [".stat:nth-child(4)", [4]]], [[".flow > .node", [0, 1]], [".stack", [2]], [".row.c2 > .card:first-child", [3]], [".row.c2 > .card:last-child", [4]]], [[".steps", [0, 1, 2]], ["pre.code", [3]], [".fill > .card", [4]]], [[".row.c3 > .card:nth-child(1)", [0, 1]], [".row.c3 > .card:nth-child(2)", [2, 3]], [".row.c3 > .card:nth-child(3)", [4]]], [[".viewer", [0]], [".gtabs button:nth-of-type(1)", [1]], [".gtabs button:nth-of-type(2)", [2]], [".gtabs button:nth-of-type(3)", [3]], [".gtabs button:nth-of-type(5)", [4]]], [[".fill > .row.c2 > .card:nth-child(1)", [0, 1]], [".fill > .row.c2 > .card:nth-child(2)", [2]], [".fill > .row.c2 > .card:nth-child(3)", [3]], [".fill > .row.c2 > .card:nth-child(4)", [4]]], [[".tc:nth-child(1)", [0]], [".tc:nth-child(3)", [1]], [".tc:nth-child(4)", [2]], [".tc:nth-child(6)", [3]], [".trouble + p", [4]]], [["img.shot", [0, 1]], [".fill > div > .card", [2]], [".fill > .card", [3, 4]]], [[".score", [0, 1, 2]], [".checks + p", [3]]], [[".gtab2", [0, 1]], [".glist", [2, 3]]], [[".src > div:first-child > .card:first-child", [0, 1]], [".src > div:last-child > .card", [2]], [".src > div:first-child > .card:last-child", [3, 4]]]];
-  let practice = false;
-  function placeNotes() {
-    document.querySelectorAll(".pnotes").forEach((n) => n.remove());
-    slides.forEach((sl) => sl.classList.remove("practice"));
-    if (!practice) return;
-    const slide = slides[cur];
-    const lines = (NOTES[cur] || ["", []])[1];
-    const groups = NOTE_ANCHORS[cur] || [];
-    slide.classList.add("practice");
-    const layer = document.createElement("div");
-    layer.className = "pnotes";
-    slide.appendChild(layer);
-    const scale = slide.getBoundingClientRect().width / slide.offsetWidth;
+
+  // 대본 메모: 대본을 짧게 줄인 메모를 해당 내용 가까운 빈 자리에 작게 붙인다 (M 키로 숨기기/보이기)
+  const CUES = [[["h1", "①", "인사하고 서비스 이름 소개"], [".mission", "②", "과제명 읽기"], [".desc", "③", "5년 검색 데이터 → 숫자로 답함"], [".links", "④⑤", "주소 누르면 열림 · 첫 접속 50초"]], [[".key", "①~③", "일반 GPT는 내 데이터를 모름 → 아는 AI 만들기"], [".row.c4", "④", "결과물 4가지 하나씩 짚기"], [".flowline", "⑤", "분석 → 저장 → AI 대화 → 배포"]], [["dl.info", "①~⑤", "6개 분야 25개 · 기술 → 배포 → 데이터 → API 10개"], [".fill > div > .card", "⑥", "제출 3가지: 저장소 · README · 사진 3장"]], [[".row.c2 > .card:first-child", "①②", "일반 챗봇 = 일반론 (예시 문장)"], [".row.c2 > .card:last-child", "③", "떠날까 = 실제 숫자 77점"], [".key", "④⑤", "비결: 질문마다 요약을 같이 보냄"]], [["dl.info", "①②", "구글 트렌드 261주 · 검색 횟수 아님"], [".chart", "③④", "평균 39.7 · 10월 3주 100점 · 11월 1주 77점"], [".stat:nth-child(4)", "⑤", "8주 비교 +70.2% → 상승"]], [[".flow", "①②", "사용자 → 버셀 화면 → 렌더 서버"], [".stack", "③", "서버만 DB·AI에 접근"], [".row.c2", "④⑤", "키는 Render에만 · 화면은 주소 1개"]], [[".steps", "①~③", "5단계: 질문 → 요약 → 프롬프트 → GPT → 저장"], ["pre.code", "④", "노란 줄 = 답변 규칙"], [".fill > .card", "⑤", "요약만 보내서 비용↓ · 바로 반영"]], [[".row.c3 > .card:nth-child(1)", "①②", "routers = 주소 / services = 처리"], [".row.c3 > .card:nth-child(2)", "③④", "없는 날짜 · 100 초과 → 422"], [".row.c3 > .card:nth-child(3)", "⑤", "추가 · 조회 · 수정 · 삭제"]], [[".gtabs", "①", "버튼 눌러 화면 바꾸며 설명"], [".viewer", "②~⑤", "채팅 → 로딩 → 데이터 → 기록 → 내보내기"]], [[".fill > .row.c2 > .card:nth-child(1)", "①②", "CORS = 허락한 주소만"], [".fill > .row.c2 > .card:nth-child(2)", "③", "키는 .env · Render에만"], [".fill > .row.c2 > .card:nth-child(3)", "④", "50초 깨우기 · 다시 시도"], [".fill > .row.c2 > .card:nth-child(4)", "⑤", "길이 제한 · 대화 10개만"]], [[".tc:nth-child(1)", "①", "증상 → 원인 → 해결 순서로"], [".tc:nth-child(3)", "②", "가장 기억에 남는 문제"], [".tc:nth-child(4)", "③", "단위 ‘점’으로 통일"], [".tc:nth-child(6)", "④⑤", "점검표로 직접 찾음 · 변경 기록"]], [["img.shot", "①②", "기간 질문은 아직 못 함 (요약만 봄)"], [".fill > div > .card", "③", "대신 지어내지 않음"], [".fill > .card", "④⑤", "다음: Function Calling 외 3가지"]], [[".score", "①~③", "필수 12개 통과 · 보너스 2개"], [".checks", "④", "파일 · 증빙은 대조표 문서에"]], [[".gtab2", "①②", "98개 · 단계 누르면 바뀜"], [".glist", "③④", "예: CORS, 시스템 프롬프트"]], [[".src", "①~⑤", "수집일 · 공식 문서 · 저장소 → 감사 인사"]]];
+  function rectOf(el, base, scale) {
+    const r = el.getBoundingClientRect();
+    return { x: (r.left - base.left) / scale, y: (r.top - base.top) / scale, w: r.width / scale, h: r.height / scale };
+  }
+  function overlap(a, b, pad) {
+    return a.x < b.x + b.w + pad && a.x + a.w + pad > b.x && a.y < b.y + b.h + pad && a.y + a.h + pad > b.y;
+  }
+  function gap(a, b) {
+    const dx = Math.max(0, b.x - (a.x + a.w), a.x - (b.x + b.w));
+    const dy = Math.max(0, b.y - (a.y + a.h), a.y - (b.y + b.h));
+    return Math.hypot(dx, dy);
+  }
+  function placeCues(i) {
+    const slide = slides[i];
+    if (!slide || slide.dataset.cued) return;
+    slide.dataset.cued = "1";
     const base = slide.getBoundingClientRect();
-    const placed = [];
-    groups.forEach(([sel, idx]) => {
-      const anchor = slide.querySelector(sel);
-      const note = document.createElement("div");
-      note.className = "pnote";
-      note.innerHTML = idx.filter((i) => lines[i]).map((i) => "<p><i>" + (i + 1) + "</i><span>" + lines[i] + "</span></p>").join("");
-      layer.appendChild(note);
-      let x = 60, y = 120;
-      if (anchor) {
-        const r = anchor.getBoundingClientRect();
-        x = (r.left - base.left) / scale + 14;
-        y = (r.top - base.top) / scale + 10;
+    const scale = base.width / slide.offsetWidth;
+    const W = slide.offsetWidth, H = slide.offsetHeight;
+    // 글자·그림이 있는 자리는 피한다
+    const obstacles = [];
+    slide.querySelectorAll("*").forEach((el) => {
+      if (el.closest(".cue")) return;
+      const own = Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.nodeValue.trim());
+      const solid = el.matches("img, pre, button, input, .badge, .deco, .memo, .chart, .globe, .bubble, .tag, .cnt, code, .clickhint, .link, .stat, .ck, .tc dl, .term, .gtab2 button, .node .ni, .flowline .chip");
+      if (!own && !solid) return;
+      const r = rectOf(el, base, scale);
+      if (r.w > 0 && r.h > 0) obstacles.push(r);
+    });
+    // 화면 아래 이동 버튼과 도움말 자리는 비워 둔다
+    obstacles.push({ x: W - 200, y: H - 56, w: 200, h: 56 }, { x: 0, y: H - 30, w: 460, h: 30 });
+    (CUES[i] || []).forEach(([sel, no, text]) => {
+      const anchorEl = slide.querySelector(sel);
+      const cue = document.createElement("div");
+      cue.className = "cue";
+      cue.innerHTML = (no ? "<i>" + no + "</i>" : "") + text;
+      slide.appendChild(cue);
+      const a = anchorEl ? rectOf(anchorEl, base, scale) : { x: 60, y: 100, w: 10, h: 10 };
+      let best = null;
+      // 폭을 줄여 가며(줄바꿈 늘림) 빈 자리를 찾는다
+      for (const mw of [250, 190, 150, 120]) {
+        cue.style.maxWidth = mw + "px";
+        const w = cue.offsetWidth, h = cue.offsetHeight;
+        for (let y = 10; y + h <= H - 8; y += 5) {
+          for (let x = 10; x + w <= W - 10; x += 6) {
+            const c = { x, y, w, h };
+            if (obstacles.some((o) => overlap(c, o, 2))) continue;
+            const d = gap(c, a);
+            if (!best || d < best.d) best = { x, y, d, w, h, mw };
+          }
+        }
+        if (best && best.d < 60) break;
       }
-      const w = note.offsetWidth, h = note.offsetHeight;
-      x = Math.max(12, Math.min(slide.offsetWidth - w - 12, x));
-      for (let k = 0; k < 20; k++) {
-        const hit = placed.find((p) => x < p.x + p.w + 6 && x + w + 6 > p.x && y < p.y + p.h + 6 && y + h + 6 > p.y);
-        if (!hit) break;
-        y = hit.y + hit.h + 10;
+      if (!best) {
+        cue.style.maxWidth = "150px";
+        best = { x: Math.min(W - cue.offsetWidth - 12, a.x + a.w - cue.offsetWidth - 6), y: Math.max(12, a.y + 4), w: cue.offsetWidth, h: cue.offsetHeight, mw: 150 };
       }
-      y = Math.max(12, Math.min(slide.offsetHeight - h - 12, y));
-      note.style.left = x + "px"; note.style.top = y + "px";
-      placed.push({ x, y, w, h });
+      cue.style.maxWidth = best.mw + "px";
+      cue.style.left = best.x + "px"; cue.style.top = best.y + "px";
+      obstacles.push({ x: best.x, y: best.y, w: best.w, h: best.h });
     });
   }
+  // 글꼴과 사진을 다 불러오면 메모 자리를 다시 잡는다
+  function resetCues() {
+    slides.forEach((sl) => { sl.querySelectorAll(".cue").forEach((c) => c.remove()); delete sl.dataset.cued; });
+    placeCues(cur);
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(resetCues);
+  window.addEventListener("load", resetCues);
   // 복사 버튼
   const toast = document.getElementById("toast");
   function flash(msg) {
