@@ -19,7 +19,7 @@ def _check_date(value: str) -> str:
 class DataCreate(BaseModel):
     """데이터 추가 요청."""
     date: str = Field(description="주 시작일 (YYYY-MM-DD)", examples=["2026-11-15"])
-    value: float = Field(ge=0, le=100, description="검색 관심도 (0~100)", examples=[55])
+    value: float = Field(ge=0, le=100, description="검색 관심도 지수 (0~100점)", examples=[55])
     memo: str = Field(default="", max_length=200, description="메모 (선택)")
 
     @field_validator("date")
@@ -31,7 +31,7 @@ class DataCreate(BaseModel):
 class DataUpdate(BaseModel):
     """데이터 수정 요청. 바꿀 항목만 보내면 된다."""
     date: Optional[str] = Field(default=None, description="주 시작일 (YYYY-MM-DD)")
-    value: Optional[float] = Field(default=None, ge=0, le=100, description="검색 관심도 (0~100)")
+    value: Optional[float] = Field(default=None, ge=0, le=100, description="검색 관심도 지수 (0~100점)")
     memo: Optional[str] = Field(default=None, max_length=200, description="메모")
 
     @field_validator("date")
