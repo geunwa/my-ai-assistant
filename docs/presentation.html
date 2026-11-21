@@ -250,6 +250,16 @@ img.shot { width: 100%; display: block; border-radius: 14px; border: 1px solid v
 #pop .pn { font-weight: 800; color: var(--blue-d); font-size: 16px; }
 #pop .ps { display: block; font-size: 12.5px; color: var(--muted); margin: 1px 0 4px; }
 #pop .pc { position: absolute; right: 10px; top: 8px; font-size: 12px; color: var(--muted); }
+/* 대본 메모 (M 키) */
+.slide.practice::after { content: ""; position: absolute; inset: 0; background: rgba(244, 249, 254, .62); z-index: 15; pointer-events: none; }
+.pnotes { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+.pnote { position: absolute; max-width: 380px; background: #fff6d6; border: 1px solid #f2d58a; border-radius: 6px 14px 14px 14px;
+  box-shadow: 0 8px 18px rgba(161, 92, 0, .18); padding: 8px 12px 9px; transform: rotate(-.6deg);
+  font-family: "Nanum Pen Script", "Jua", cursive; font-size: 22px; line-height: 1.12; color: #3a2a12; pointer-events: auto; }
+.pnote::before { content: ""; position: absolute; left: 14px; top: -7px; width: 46px; height: 12px; background: rgba(133, 183, 235, .55); border-radius: 2px; transform: rotate(-3deg); }
+.pnote p { display: grid; grid-template-columns: 22px 1fr; gap: 4px; margin: 2px 0; }
+.pnote p i { font-style: normal; width: 20px; height: 20px; border-radius: 50%; background: #e8a83c; color: #fff; font-family: Pretendard, sans-serif; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+.pnote b { font-weight: 400; color: #b4541a; }
 /* 클릭 표시 */
 a, button { cursor: pointer; }
 .hand { width: 15px; height: 15px; color: var(--orange); flex: none; animation: tap 1.6s ease-in-out infinite; }
@@ -845,7 +855,7 @@ AI 비서 '떠날까'다.
 </div></div>
 
 <div id="progress"></div>
-<div id="help">← → 또는 Space: 이동 · F: 전체 화면 · <b>N: 설명글</b></div>
+<div id="help">← → 또는 Space: 이동 · F: 전체 화면 · <b>N: 설명글</b> · <b>M: 대본 메모</b></div>
 <div id="notes"><div class="nh"><span id="notesTitle"></span><span>N 키로 닫기</span></div><ol id="notesBody"></ol></div>
 <div id="nav"><button id="prev" aria-label="이전 장"><svg class="ic"><use href="#i-left"/></svg></button><span id="count"></span><button id="next" aria-label="다음 장"><svg class="ic"><use href="#i-right"/></svg></button></div>
 <div id="toast">복사했어요</div>
@@ -869,6 +879,7 @@ AI 비서 '떠날까'다.
     history.replaceState(null, "", "#" + (cur + 1));
     if (typeof renderNotes === "function" && notesBox.classList.contains("on")) renderNotes();
     const pp = document.getElementById("pop"); if (pp) pp.classList.remove("on");
+    if (typeof placeNotes === "function" && typeof practice !== "undefined" && practice) placeNotes();
   }
   document.getElementById("prev").onclick = () => show(cur - 1);
   document.getElementById("next").onclick = () => show(cur + 1);
@@ -879,13 +890,14 @@ AI 비서 '떠날까'다.
     else if (e.key === "Home") show(0);
     else if (e.key === "End") show(slides.length - 1);
     else if (e.key === "Escape") { document.getElementById("pop").classList.remove("on"); }
+    else if (e.key === "m" || e.key === "M" || e.key === "ㅡ") { practice = !practice; placeNotes(); }
     else if (e.key === "n" || e.key === "N" || e.key === "ㅜ") { notesBox.classList.toggle("on"); renderNotes(); }
     else if (e.key === "f" || e.key === "F") {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
       else document.exitFullscreen();
     }
   });
-  window.addEventListener("resize", fit);
+  window.addEventListener("resize", () => { fit(); if (typeof practice !== "undefined" && practice) placeNotes(); });
 
 
 
@@ -964,6 +976,48 @@ AI 비서 '떠날까'다.
     document.getElementById("notesTitle").textContent = (cur + 1) + "장 · " + n[0] + " · 설명글";
     document.getElementById("notesBody").innerHTML = n[1].map((t) => "<li>" + t + "</li>").join("");
     notesBox.scrollTop = 0;
+  }
+
+  // 대본 메모 (M 키): 대본 문장을 해당 내용 위에 번호 붙은 메모로 띄운다
+  const NOTE_ANCHORS = [[["h1", [0]], [".mission", [1]], [".desc", [2]], [".links", [3, 4]]], [[".key", [0, 1, 2]], [".row.c4", [3]], [".flowline", [4]]], [["dl.info dt:nth-of-type(1)", [0, 1]], ["dl.info dt:nth-of-type(3)", [2, 3]], ["dl.info dt:nth-of-type(4)", [4]], [".fill > div > .card", [5]]], [[".row.c2 > .card:first-child", [0, 1]], [".row.c2 > .card:last-child", [2]], [".key", [3, 4]]], [["dl.info", [0, 1]], [".chart", [2, 3]], [".stat:nth-child(4)", [4]]], [[".flow > .node", [0, 1]], [".stack", [2]], [".row.c2 > .card:first-child", [3]], [".row.c2 > .card:last-child", [4]]], [[".steps", [0, 1, 2]], ["pre.code", [3]], [".fill > .card", [4]]], [[".row.c3 > .card:nth-child(1)", [0, 1]], [".row.c3 > .card:nth-child(2)", [2, 3]], [".row.c3 > .card:nth-child(3)", [4]]], [[".viewer", [0]], [".gtabs button:nth-of-type(1)", [1]], [".gtabs button:nth-of-type(2)", [2]], [".gtabs button:nth-of-type(3)", [3]], [".gtabs button:nth-of-type(5)", [4]]], [[".fill > .row.c2 > .card:nth-child(1)", [0, 1]], [".fill > .row.c2 > .card:nth-child(2)", [2]], [".fill > .row.c2 > .card:nth-child(3)", [3]], [".fill > .row.c2 > .card:nth-child(4)", [4]]], [[".tc:nth-child(1)", [0]], [".tc:nth-child(3)", [1]], [".tc:nth-child(4)", [2]], [".tc:nth-child(6)", [3]], [".trouble + p", [4]]], [["img.shot", [0, 1]], [".fill > div > .card", [2]], [".fill > .card", [3, 4]]], [[".score", [0, 1, 2]], [".checks + p", [3]]], [[".gtab2", [0, 1]], [".glist", [2, 3]]], [[".src > div:first-child > .card:first-child", [0, 1]], [".src > div:last-child > .card", [2]], [".src > div:first-child > .card:last-child", [3, 4]]]];
+  let practice = false;
+  function placeNotes() {
+    document.querySelectorAll(".pnotes").forEach((n) => n.remove());
+    slides.forEach((sl) => sl.classList.remove("practice"));
+    if (!practice) return;
+    const slide = slides[cur];
+    const lines = (NOTES[cur] || ["", []])[1];
+    const groups = NOTE_ANCHORS[cur] || [];
+    slide.classList.add("practice");
+    const layer = document.createElement("div");
+    layer.className = "pnotes";
+    slide.appendChild(layer);
+    const scale = slide.getBoundingClientRect().width / slide.offsetWidth;
+    const base = slide.getBoundingClientRect();
+    const placed = [];
+    groups.forEach(([sel, idx]) => {
+      const anchor = slide.querySelector(sel);
+      const note = document.createElement("div");
+      note.className = "pnote";
+      note.innerHTML = idx.filter((i) => lines[i]).map((i) => "<p><i>" + (i + 1) + "</i><span>" + lines[i] + "</span></p>").join("");
+      layer.appendChild(note);
+      let x = 60, y = 120;
+      if (anchor) {
+        const r = anchor.getBoundingClientRect();
+        x = (r.left - base.left) / scale + 14;
+        y = (r.top - base.top) / scale + 10;
+      }
+      const w = note.offsetWidth, h = note.offsetHeight;
+      x = Math.max(12, Math.min(slide.offsetWidth - w - 12, x));
+      for (let k = 0; k < 20; k++) {
+        const hit = placed.find((p) => x < p.x + p.w + 6 && x + w + 6 > p.x && y < p.y + p.h + 6 && y + h + 6 > p.y);
+        if (!hit) break;
+        y = hit.y + hit.h + 10;
+      }
+      y = Math.max(12, Math.min(slide.offsetHeight - h - 12, y));
+      note.style.left = x + "px"; note.style.top = y + "px";
+      placed.push({ x, y, w, h });
+    });
   }
   // 복사 버튼
   const toast = document.getElementById("toast");
